@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import ActivityLog
+
 
 User = get_user_model()
 
@@ -148,10 +148,3 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         if attrs["password"] != attrs["password_confirm"]:
             raise serializers.ValidationError({"password_confirm": _("كلمتا المرور غير متطابقتين.")})
         return attrs
-
-
-class ActivityLogSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ActivityLog
-        fields = ["id", "activity_type", "description", "metadata", "created_at"]
-        read_only_fields = ["id", "created_at"]

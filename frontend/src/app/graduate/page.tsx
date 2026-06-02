@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
-import { useStreakStore } from '@/store/streakStore'
 import DashboardLayout from '@/components/DashboardLayout'
 import AdBanner from '@/components/AdBanner'
 import { graduateService, applicationService, interviewService, jobService, aiService } from '@/lib/api-services'
@@ -15,7 +14,6 @@ export default function GraduateDashboardPage() {
   const { t } = useTranslation()
   const router = useRouter()
   const { user, isAuthenticated, isLoading: authLoading, fetchProfile } = useAuthStore()
-  const { fetchStreak } = useStreakStore()
   const [profile, setProfile] = useState<GraduateProfile | null>(null)
   const [appCount, setAppCount] = useState(0)
   const [interviewCount, setInterviewCount] = useState(0)
@@ -26,7 +24,6 @@ export default function GraduateDashboardPage() {
 
   useEffect(() => {
     fetchProfile()
-    fetchStreak()
   }, [])
 
   useEffect(() => {

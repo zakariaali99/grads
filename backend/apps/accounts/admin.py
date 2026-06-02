@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import User, VerificationCode, AuditLog, LoginAttempt, ActivityStreak, ActivityLog
+from .models import User, VerificationCode, AuditLog, LoginAttempt
 
 
 @admin.register(User)
@@ -38,16 +38,3 @@ class AuditLogAdmin(admin.ModelAdmin):
 class LoginAttemptAdmin(admin.ModelAdmin):
     list_display = ["username", "successful", "ip_address", "timestamp"]
     list_filter = ["successful", "timestamp"]
-
-
-@admin.register(ActivityStreak)
-class ActivityStreakAdmin(admin.ModelAdmin):
-    list_display = ["user", "current_streak", "longest_streak", "total_activities", "last_active_date"]
-    search_fields = ["user__username", "user__email"]
-
-
-@admin.register(ActivityLog)
-class ActivityLogAdmin(admin.ModelAdmin):
-    list_display = ["user", "activity_type", "description", "created_at"]
-    list_filter = ["activity_type", "created_at"]
-    search_fields = ["user__username", "description"]

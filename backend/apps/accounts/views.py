@@ -1,6 +1,6 @@
-from rest_framework import status, generics, views
+from rest_framework import status, generics
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -14,10 +14,9 @@ from .serializers import (
     PasswordResetRequestSerializer,
     PasswordResetConfirmSerializer,
     CustomTokenObtainPairSerializer,
-    ActivityLogSerializer,
 )
 from .utils import generate_verification_code, send_verification_email, calculate_profile_completion
-from .models import VerificationCode, ActivityStreak, ActivityLog
+from .models import VerificationCode
 
 User = get_user_model()
 
@@ -189,58 +188,3 @@ class DeleteAccountView(generics.DestroyAPIView):
         user.is_active = False
         user.save()
         return Response({"success": True, "message": _("تم حذف الحساب.")})
-
-
-class StreakView(views.APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        streak, created = ActivityStreak.objects.get_or_create(user=request.user)
-        from django.utils import timezone
-
-        today = timezone.localdate()
-        return Response(
-            {
-                "current_streak": streak.current_streak,
-                "longest_streak": streak.longest_streak,
-                "total_activities": streak.total_activities,
-                "last_active": streak.last_active_date.isoformat() if streak.last_active_date else None,
-                "today_active": streak.last_active_date == today,
-            }
-        )
-
-
-class ActivityLogView(views.APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        logs = ActivityLog.objects.filter(user=request.user)[:50]
-        return Response(
-            [
-                {
-                    "id": str(log.id),
-                    "activity_type": log.activity_type,
-                    "activity_type_display": log.get_activity_type_display(),
-                    "description": log.description,
-                    "created_at": log.created_at.isoformat(),
-                }
-                for log in logs
-            ]
-        )
-
-    def post(self, request):
-        serializer = ActivityLogSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        log = ActivityLog.record(
-            user=request.user,
-            activity_type=serializer.validated_data["activity_type"],
-            description=serializer.validated_data.get("description", ""),
-            metadata=serializer.validated_data.get("metadata", {}),
-        )
-        return Response(
-            {
-                "success": True,
-                "activity": ActivityLogSerializer(log).data,
-            },
-            status=201,
-        )

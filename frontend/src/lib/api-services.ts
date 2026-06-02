@@ -138,11 +138,6 @@ export const aiService = {
   rankCandidates: (jobId: string) => api.get(`/ai/rank-candidates/${jobId}/`),
 }
 
-// ─── Streaks ─────────────────────────────────────────────────────────────────
-export const streakService = {
-  getMyStreak: () => api.get<{ current_streak: number; longest_streak: number; total_activities: number; last_active: string; today_active: boolean }>('/streaks/me/'),
-}
-
 // ─── Admin ───────────────────────────────────────────────────────────────────
 export const adminService = {
   listUsers: (params?: any) => api.get<PaginatedResponse<User>>('/admin/users/', { params }),

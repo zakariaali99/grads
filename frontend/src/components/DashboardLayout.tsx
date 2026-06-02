@@ -12,7 +12,6 @@ import {
   PanelRightClose, PanelRightOpen, PanelLeftClose, PanelLeftOpen, Megaphone,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
-import StreakBadge from '@/components/StreakBadge'
 import Topbar from '@/components/Topbar'
 
 const navItems = {
@@ -107,13 +106,7 @@ export default function DashboardLayout({ children, role }: { children: React.Re
         </div>
 
         {!collapsed && (
-          <>
-            {/* Streak */}
-            <div className="px-4 mb-3">
-              <StreakBadge compact />
-            </div>
-            <div className="mx-5 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent mb-3" />
-          </>
+          <div className="mx-5 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent mb-3" />
         )}
 
         {/* Navigation */}
