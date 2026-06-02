@@ -1,9 +1,19 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from apps.graduates.models import SkillCategory, Skill, College, GraduateProfile, GraduateSkill, Education, Certification, Experience, Project
+from apps.graduates.models import (
+    SkillCategory,
+    Skill,
+    College,
+    GraduateProfile,
+    GraduateSkill,
+    Education,
+    Certification,
+    Experience,
+    Project,
+)
 from apps.employers.models import Industry, CompanyProfile
-from apps.jobs.models import JobCategory, JobPost, JobApplication, Interview, SavedJob
+from apps.jobs.models import JobCategory, JobPost, JobApplication, Interview
 from apps.notifications.models import Notification
 from apps.chat.models import Conversation, Message
 from apps.ads.models import Advertisement
@@ -21,10 +31,15 @@ class Command(BaseCommand):
 
         # ── Admin ──
         admin, _ = User.objects.get_or_create(
-            username="admin", defaults=dict(
-                email="admin@jreejoon.ly", user_type="admin",
-                is_verified=True, is_active=True, is_superuser=True, is_staff=True,
-            )
+            username="admin",
+            defaults=dict(
+                email="admin@jreejoon.ly",
+                user_type="admin",
+                is_verified=True,
+                is_active=True,
+                is_superuser=True,
+                is_staff=True,
+            ),
         )
         admin.set_password("admin123")
         admin.save()
@@ -34,16 +49,80 @@ class Command(BaseCommand):
 
         # ── Skill Categories & Skills ──
         cat_data = {
-            "تطوير البرمجيات": ["Python", "JavaScript", "TypeScript", "Java", "C#", "PHP", "Ruby", "Go", "Rust", "Kotlin", "Swift", "Dart"],
-            "تطوير الويب": ["React", "Vue.js", "Angular", "Next.js", "Node.js", "Django", "Laravel", "ASP.NET", "Flask", "FastAPI", "Spring Boot", "Express.js"],
+            "تطوير البرمجيات": [
+                "Python",
+                "JavaScript",
+                "TypeScript",
+                "Java",
+                "C#",
+                "PHP",
+                "Ruby",
+                "Go",
+                "Rust",
+                "Kotlin",
+                "Swift",
+                "Dart",
+            ],
+            "تطوير الويب": [
+                "React",
+                "Vue.js",
+                "Angular",
+                "Next.js",
+                "Node.js",
+                "Django",
+                "Laravel",
+                "ASP.NET",
+                "Flask",
+                "FastAPI",
+                "Spring Boot",
+                "Express.js",
+            ],
             "تطوير التطبيقات": ["Flutter", "React Native", "Android SDK", "iOS SDK", "Xamarin"],
-            "قواعد البيانات": ["PostgreSQL", "MySQL", "MongoDB", "SQLite", "Redis", "Elasticsearch", "MariaDB", "Oracle"],
-            " DevOps والبنية التحتية": ["Docker", "Kubernetes", "AWS", "Azure", "GCP", "Terraform", "Ansible", "Jenkins", "GitLab CI", "GitHub Actions"],
+            "قواعد البيانات": [
+                "PostgreSQL",
+                "MySQL",
+                "MongoDB",
+                "SQLite",
+                "Redis",
+                "Elasticsearch",
+                "MariaDB",
+                "Oracle",
+            ],
+            " DevOps والبنية التحتية": [
+                "Docker",
+                "Kubernetes",
+                "AWS",
+                "Azure",
+                "GCP",
+                "Terraform",
+                "Ansible",
+                "Jenkins",
+                "GitLab CI",
+                "GitHub Actions",
+            ],
             "الشبكات والأمن": ["CCNA", "CCNP", "Kali Linux", "Wireshark", "Nmap", "Metasploit", "OWASP", "Burp Suite"],
-            "الذكاء الاصطناعي": ["Machine Learning", "Deep Learning", "NLP", "Computer Vision", "TensorFlow", "PyTorch", "Scikit-learn", "Pandas", "NumPy"],
+            "الذكاء الاصطناعي": [
+                "Machine Learning",
+                "Deep Learning",
+                "NLP",
+                "Computer Vision",
+                "TensorFlow",
+                "PyTorch",
+                "Scikit-learn",
+                "Pandas",
+                "NumPy",
+            ],
             "التصميم": ["Figma", "Adobe XD", "Photoshop", "Illustrator", "UI/UX", "After Effects", "Premiere Pro"],
             "إدارة المشاريع": ["PMI", "PMP", "Agile", "Scrum", "JIRA", "Trello", "Asana", "Microsoft Project"],
-            "المهارات الإدارية": ["Microsoft Office", "Excel Advanced", "Power BI", "Tableau", "SAP", "Oracle ERP", "HR Management"],
+            "المهارات الإدارية": [
+                "Microsoft Office",
+                "Excel Advanced",
+                "Power BI",
+                "Tableau",
+                "SAP",
+                "Oracle ERP",
+                "HR Management",
+            ],
         }
         self.stdout.write("  Creating skill categories and skills...")
         for cat_name, skill_names in cat_data.items():
@@ -70,9 +149,18 @@ class Command(BaseCommand):
 
         # ── Industries ──
         industries = [
-            "تقنية المعلومات", "الاتصالات", "المالية والمصرفية", "التعليم",
-            "الصحة", "النفط والغاز", "البناء والتشييد", "النقل والخدمات اللوجستية",
-            "السياحة والضيافة", "الإعلام", "الطاقة المتجددة", "الزراعة",
+            "تقنية المعلومات",
+            "الاتصالات",
+            "المالية والمصرفية",
+            "التعليم",
+            "الصحة",
+            "النفط والغاز",
+            "البناء والتشييد",
+            "النقل والخدمات اللوجستية",
+            "السياحة والضيافة",
+            "الإعلام",
+            "الطاقة المتجددة",
+            "الزراعة",
         ]
         self.stdout.write("  Creating industries...")
         for ind in industries:
@@ -80,9 +168,18 @@ class Command(BaseCommand):
 
         # ── Job Categories ──
         job_cats = [
-            "تطوير البرمجيات", "هندسة الشبكات", "أمن المعلومات", "تحليل البيانات",
-            "التصميم", "التسويق", "المالية", "الموارد البشرية", "الإدارة",
-            "التعليم", "الاستشارات", "الصيانة",
+            "تطوير البرمجيات",
+            "هندسة الشبكات",
+            "أمن المعلومات",
+            "تحليل البيانات",
+            "التصميم",
+            "التسويق",
+            "المالية",
+            "الموارد البشرية",
+            "الإدارة",
+            "التعليم",
+            "الاستشارات",
+            "الصيانة",
         ]
         self.stdout.write("  Creating job categories...")
         for i, jc in enumerate(job_cats):
@@ -92,12 +189,76 @@ class Command(BaseCommand):
         colleges_pool = list(College.objects.all())
 
         # ── Graduate Users ──
-        grad_first_names = ["محمد", "أحمد", "علي", "عمر", "خالد", "سارة", "فاطمة", "نور", "مريم", "أسماء", "حسن", "حسين", "يوسف", "إبراهيم", "عبدالله", "ليلى", "هدى", "منى", "رنا", "سامي"]
-        grad_last_names = ["السالمي", "القذافي", "المصراتي", "الزنتاني", "الورفلي", "المقريف", "الكيب", "الجهمي", "الطويل", "باعامر", "الفيتوري", "الشريف", "بن سليمان", "العائش", "الدرسي", "شنيب", "بوشناف", "الغويل", "المنفي", "بن سالم"]
+        grad_first_names = [
+            "محمد",
+            "أحمد",
+            "علي",
+            "عمر",
+            "خالد",
+            "سارة",
+            "فاطمة",
+            "نور",
+            "مريم",
+            "أسماء",
+            "حسن",
+            "حسين",
+            "يوسف",
+            "إبراهيم",
+            "عبدالله",
+            "ليلى",
+            "هدى",
+            "منى",
+            "رنا",
+            "سامي",
+        ]
+        grad_last_names = [
+            "السالمي",
+            "القذافي",
+            "المصراتي",
+            "الزنتاني",
+            "الورفلي",
+            "المقريف",
+            "الكيب",
+            "الجهمي",
+            "الطويل",
+            "باعامر",
+            "الفيتوري",
+            "الشريف",
+            "بن سليمان",
+            "العائش",
+            "الدرسي",
+            "شنيب",
+            "بوشناف",
+            "الغويل",
+            "المنفي",
+            "بن سالم",
+        ]
         cities = ["طرابلس", "بنغازي", "مصراتة", "الخمس", "زوارة", "سبها", "طبرق", "درنة", "البيضاء", "غريان"]
         degrees = ["بكالوريوس", "ماجستير", "دكتوراه"]
-        majors = ["علوم حاسوب", "هندسة برمجيات", "نظم معلومات", "ذكاء اصطناعي", "شبكات", "هندسة كهربائية", "هندسة ميكانيكية", "إدارة أعمال", "محاسبة", "رياضيات"]
-        companies = ["ليبيا تك", "المتكاملة", "الحلول المتقدمة", "تقانة", "إبداع", "الجيل الجديد", "العنقاء", "سدرة", "الأندلس", "المستقبل"]
+        majors = [
+            "علوم حاسوب",
+            "هندسة برمجيات",
+            "نظم معلومات",
+            "ذكاء اصطناعي",
+            "شبكات",
+            "هندسة كهربائية",
+            "هندسة ميكانيكية",
+            "إدارة أعمال",
+            "محاسبة",
+            "رياضيات",
+        ]
+        companies = [
+            "ليبيا تك",
+            "المتكاملة",
+            "الحلول المتقدمة",
+            "تقانة",
+            "إبداع",
+            "الجيل الجديد",
+            "العنقاء",
+            "سدرة",
+            "الأندلس",
+            "المستقبل",
+        ]
 
         self.stdout.write("  Creating graduate users...")
         graduate_users = []
@@ -109,13 +270,17 @@ class Command(BaseCommand):
             user, created = User.objects.get_or_create(
                 username=username,
                 defaults=dict(
-                    email=email, first_name=fn, last_name=ln, user_type="graduate",
-                    is_verified=random.random() > 0.3, is_active=True,
+                    email=email,
+                    first_name=fn,
+                    last_name=ln,
+                    user_type="graduate",
+                    is_verified=random.random() > 0.3,
+                    is_active=True,
                     gender=random.choice(["male", "female"]),
                     phone=f"+21891{random.randint(1000000,9999999)}",
                     bio=f"خريج {random.choice(majors)} مهتم بتطوير المهارات والعمل في مجال التقنية",
                     date_of_birth=date(random.randint(1995, 2002), random.randint(1, 12), random.randint(1, 28)),
-                )
+                ),
             )
             if created:
                 user.set_password("pass1234")
@@ -128,7 +293,16 @@ class Command(BaseCommand):
             profile, _ = GraduateProfile.objects.get_or_create(
                 user=user,
                 defaults=dict(
-                    headline=random.choice(["مطور برمجيات", "مهندس شبكات", "محلل بيانات", "مصمم واجهات", "مهندس ذكاء اصطناعي", "مطور تطبيقات"]),
+                    headline=random.choice(
+                        [
+                            "مطور برمجيات",
+                            "مهندس شبكات",
+                            "محلل بيانات",
+                            "مصمم واجهات",
+                            "مهندس ذكاء اصطناعي",
+                            "مطور تطبيقات",
+                        ]
+                    ),
                     college=random.choice(colleges_pool),
                     graduation_year=random.randint(2018, 2025),
                     major=random.choice(majors),
@@ -140,7 +314,7 @@ class Command(BaseCommand):
                     profile_views=random.randint(10, 500),
                     search_appearances=random.randint(5, 200),
                     employer_interactions=random.randint(0, 50),
-                )
+                ),
             )
             # Skills
             if not profile.skills.exists():
@@ -148,17 +322,19 @@ class Command(BaseCommand):
                 selected = random.sample(skills_pool, min(num_skills, len(skills_pool)))
                 for sk in selected:
                     GraduateSkill.objects.get_or_create(
-                        graduate=profile, skill=sk,
+                        graduate=profile,
+                        skill=sk,
                         defaults=dict(
                             proficiency=random.choice(["beginner", "intermediate", "advanced", "expert"]),
                             years_experience=random.randint(0, 5),
                             is_top_skill=random.random() > 0.7,
-                        )
+                        ),
                     )
             # Education
             if not profile.education.exists():
                 Education.objects.get_or_create(
-                    graduate=profile, degree=random.choice(degrees),
+                    graduate=profile,
+                    degree=random.choice(degrees),
                     field_of_study=profile.major or random.choice(majors),
                     institution=random.choice([c.name_ar for c in colleges_pool]),
                     start_date=date(profile.graduation_year - 4, 9, 1),
@@ -180,7 +356,9 @@ class Command(BaseCommand):
             if not profile.projects.exists() and random.random() > 0.4:
                 Project.objects.get_or_create(
                     graduate=profile,
-                    title=random.choice(["نظام إدارة المدرسة", "تطبيق توصيل", "منصة تعليمية", "متجر إلكتروني", "تطبيق صحي"]),
+                    title=random.choice(
+                        ["نظام إدارة المدرسة", "تطبيق توصيل", "منصة تعليمية", "متجر إلكتروني", "تطبيق صحي"]
+                    ),
                     description="مشروع تطوير ويب متكامل",
                     technologies="React, Django, PostgreSQL",
                     url="https://github.com/" + user.username + "/project",
@@ -190,7 +368,16 @@ class Command(BaseCommand):
             if not profile.certifications.exists() and random.random() > 0.5:
                 Certification.objects.get_or_create(
                     graduate=profile,
-                    name=random.choice(["CCNA", "CompTIA A+", "AWS Practitioner", "Python for Everybody", "Google IT Support", "Microsoft Azure Fundamentals"]),
+                    name=random.choice(
+                        [
+                            "CCNA",
+                            "CompTIA A+",
+                            "AWS Practitioner",
+                            "Python for Everybody",
+                            "Google IT Support",
+                            "Microsoft Azure Fundamentals",
+                        ]
+                    ),
                     issuer=random.choice(["Cisco", "CompTIA", "Amazon", "Coursera", "Google", "Microsoft"]),
                     issue_date=date(profile.graduation_year, 1, 15),
                 )
@@ -198,7 +385,18 @@ class Command(BaseCommand):
             user.save(update_fields=["profile_completion"])
 
         # ── Employer Users & Companies ──
-        employer_names = ["شركة ليبيا تك", "المؤسسة المتكاملة", "شركة الحلول المتقدمة", "شركة تقانة", "شركة إبداع", "الجيل الجديد", "شركة العنقاء", "مؤسسة سدرة", "مجموعة الأندلس", "شركة المستقبل"]
+        employer_names = [
+            "شركة ليبيا تك",
+            "المؤسسة المتكاملة",
+            "شركة الحلول المتقدمة",
+            "شركة تقانة",
+            "شركة إبداع",
+            "الجيل الجديد",
+            "شركة العنقاء",
+            "مؤسسة سدرة",
+            "مجموعة الأندلس",
+            "شركة المستقبل",
+        ]
         employer_industries = list(Industry.objects.all())
 
         self.stdout.write("  Creating employer users and companies...")
@@ -210,9 +408,13 @@ class Command(BaseCommand):
             user, created = User.objects.get_or_create(
                 username=username,
                 defaults=dict(
-                    email=f"employer{i+1}@company.ly", first_name=fn, last_name=ln,
-                    user_type="employer", is_verified=random.random() > 0.3, is_active=True,
-                )
+                    email=f"employer{i+1}@company.ly",
+                    first_name=fn,
+                    last_name=ln,
+                    user_type="employer",
+                    is_verified=random.random() > 0.3,
+                    is_active=True,
+                ),
             )
             if created:
                 user.set_password("pass1234")
@@ -228,25 +430,44 @@ class Command(BaseCommand):
                     company_size=random.choice(["1-10", "11-50", "51-200", "201-1000"]),
                     city=random.choice(cities),
                     phone=f"+21891{random.randint(1000000,9999999)}",
-                    description=f"{employer_names[i]} هي شركة رائدة في مجال {random.choice(industries)} تقدم خدمات وحلول مبتكرة.",
+                    description=f"{employer_names[i]} شركة رائدة في {random.choice(industries)} تقدم حلولاً مبتكرة.",
                     website=f"https://{username}.com",
                     is_verified=random.random() > 0.3,
-                    total_jobs=0, total_hires=random.randint(0, 20),
+                    total_jobs=0,
+                    total_hires=random.randint(0, 20),
                     profile_views=random.randint(50, 2000),
-                )
+                ),
             )
 
         self.stdout.write("  Creating job posts...")
         companies_list = list(CompanyProfile.objects.all())
-        categories_list = list(JobCategory.objects.all())
+        list(JobCategory.objects.all())
         job_titles = [
-            "مطور واجهات أمامية", "مطور باك إند", "مهندس برمجيات", "محلل بيانات",
-            "مهندس شبكات", "أخصائي أمن معلومات", "مصمم جرافيك", "مدير مشروع",
-            "مهندس DevOps", "مطور تطبيقات جوال", "أخصائي تسويق إلكتروني", "محاسب",
-            "أخصائي موارد بشرية", "كاتب محتوى", "مهندس ذكاء اصطناعي",
-            "مصمم UI/UX", "أخصائي دعم فني", "مدير منتج", "مهندس اختبار",
-            "أخصائي علاقات عامة", "محلل مالي", "مدير مبيعات", "مطور Full Stack",
-            "مهندس سحابي", "أخصائي تحسين محركات البحث",
+            "مطور واجهات أمامية",
+            "مطور باك إند",
+            "مهندس برمجيات",
+            "محلل بيانات",
+            "مهندس شبكات",
+            "أخصائي أمن معلومات",
+            "مصمم جرافيك",
+            "مدير مشروع",
+            "مهندس DevOps",
+            "مطور تطبيقات جوال",
+            "أخصائي تسويق إلكتروني",
+            "محاسب",
+            "أخصائي موارد بشرية",
+            "كاتب محتوى",
+            "مهندس ذكاء اصطناعي",
+            "مصمم UI/UX",
+            "أخصائي دعم فني",
+            "مدير منتج",
+            "مهندس اختبار",
+            "أخصائي علاقات عامة",
+            "محلل مالي",
+            "مدير مبيعات",
+            "مطور Full Stack",
+            "مهندس سحابي",
+            "أخصائي تحسين محركات البحث",
         ]
         job_posts = []
         for company in companies_list:
@@ -254,7 +475,8 @@ class Command(BaseCommand):
             for _ in range(num_jobs):
                 title = random.choice(job_titles)
                 job = JobPost.objects.create(
-                    title=title, company=company,
+                    title=title,
+                    company=company,
                     posted_by=company.user,
                     description=f"نبحث عن {title} للانضمام إلى فريق عمل {company.company_name} في {company.city}.",
                     requirements="خبرة لا تقل عن سنتين في نفس المجال\nإجادة اللغة الإنجليزية\nمهارات تواصل ممتازة",
@@ -264,7 +486,20 @@ class Command(BaseCommand):
                     salary_min=random.choice([1500, 2000, 2500, 3000]),
                     salary_max=random.choice([3500, 4000, 5000, 6000]),
                     vacancies=random.randint(1, 5),
-                    status=random.choice(["active", "active", "active", "active", "active", "active", "active", "active", "draft", "closed"]),
+                    status=random.choice(
+                        [
+                            "active",
+                            "active",
+                            "active",
+                            "active",
+                            "active",
+                            "active",
+                            "active",
+                            "active",
+                            "draft",
+                            "closed",
+                        ]
+                    ),
                     views_count=random.randint(10, 500),
                     applications_count=0,
                     is_featured=random.random() > 0.8,
@@ -285,12 +520,13 @@ class Command(BaseCommand):
             selected = random.sample(profiles_list, min(num_applicants, len(profiles_list)))
             for profile in selected:
                 app, created = JobApplication.objects.get_or_create(
-                    job=job, applicant=profile.user,
+                    job=job,
+                    applicant=profile.user,
                     defaults=dict(
                         status=random.choice(["pending", "reviewed", "shortlisted", "interview", "rejected"]),
                         match_score=random.randint(30, 95),
                         cover_letter="أنا مهتم جداً بهذه الوظيفة وأعتقد أن مهاراتي وخبراتي تتوافق مع متطلباتها.",
-                    )
+                    ),
                 )
                 if created:
                     applications_created += 1
@@ -311,13 +547,17 @@ class Command(BaseCommand):
                     scheduled_at=timezone.now() + timedelta(days=random.randint(1, 14), hours=random.randint(9, 17)),
                     duration_minutes=random.choice([30, 45, 60]),
                     notes="مقابلة للتعرف على المرشح ومناقشة الخبرات",
-                )
+                ),
             )
 
         # ── Notifications ──
         self.stdout.write("  Creating notifications...")
         notification_templates = [
-            ("application", "تم استلام طلبك", "تم استلام طلب التقديم على وظيفة {job_title} بنجاح، سنقوم بإعلامك بأي تحديثات"),
+            (
+                "application",
+                "تم استلام طلبك",
+                "تم استلام طلب التقديم على وظيفة {job_title} بنجاح، سنقوم بإعلامك بأي تحديثات",
+            ),
             ("interview", "تم تحديد موعد مقابلة", "تم تحديد موعد مقابلة شخصية لوظيفة {job_title} في تاريخ {date}"),
             ("message", "رسالة جديدة", "لديك رسالة جديدة من {name} بخصوص وظيفة {job_title}"),
             ("job_match", "وظائف مقترحة", "تم العثور على وظائف جديدة تتناسب مع مهاراتك في {city}"),
@@ -332,22 +572,31 @@ class Command(BaseCommand):
                     recipient=user,
                     notification_type=notif_type,
                     title=title,
-                    message=msg.format(job_title=random.choice(job_titles), name=random.choice(employer_users).get_full_name(), city=random.choice([c.city for c in companies_list[:5]]), date="2026-06-" + str(random.randint(1, 15)).zfill(2)),
+                    message=msg.format(
+                        job_title=random.choice(job_titles),
+                        name=random.choice(employer_users).get_full_name(),
+                        city=random.choice([c.city for c in companies_list[:5]]),
+                        date="2026-06-" + str(random.randint(1, 15)).zfill(2),
+                    ),
                     is_read=random.random() > 0.5,
                 )
         for user in employer_users:
-            notif_type, title, msg = random.choice([
-                ("application", "تقديم جديد على وظيفة", "هناك تقديم جديد على وظيفة {job_title} من {name}"),
-                ("interview", "تم تأكيد المقابلة", "قام {name} بتأكيد حضور المقابلة لوظيفة {job_title}"),
-                ("message", "رسالة جديدة", "لديك رسالة جديدة من {name} بخصوص وظيفة {job_title}"),
-                ("profile_view", "مشاهدة الملف", "قام {name} بمشاهدة ملف شركتك"),
-                ("system", "تحديث النظام", "تم إضافة ميزات جديدة للمنصة"),
-            ])
+            notif_type, title, msg = random.choice(
+                [
+                    ("application", "تقديم جديد على وظيفة", "هناك تقديم جديد على وظيفة {job_title} من {name}"),
+                    ("interview", "تم تأكيد المقابلة", "قام {name} بتأكيد حضور المقابلة لوظيفة {job_title}"),
+                    ("message", "رسالة جديدة", "لديك رسالة جديدة من {name} بخصوص وظيفة {job_title}"),
+                    ("profile_view", "مشاهدة الملف", "قام {name} بمشاهدة ملف شركتك"),
+                    ("system", "تحديث النظام", "تم إضافة ميزات جديدة للمنصة"),
+                ]
+            )
             Notification.objects.create(
                 recipient=user,
                 notification_type=notif_type,
                 title=title,
-                message=msg.format(job_title=random.choice(job_titles), name=random.choice(graduate_users).get_full_name()),
+                message=msg.format(
+                    job_title=random.choice(job_titles), name=random.choice(graduate_users).get_full_name()
+                ),
                 is_read=random.random() > 0.4,
             )
 
@@ -414,7 +663,9 @@ class Command(BaseCommand):
             except Exception:
                 pass
 
-        self.stdout.write(self.style.SUCCESS(f"""
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"""
   ✓ Seed complete!
   ─────────────────────────────────
   Admin: admin / admin123
@@ -430,4 +681,6 @@ class Command(BaseCommand):
   Chat Messages: {messages_created}
   Notifications: {Notification.objects.count()}
   Advertisements: {ads_created}
-        """))
+        """
+            )
+        )

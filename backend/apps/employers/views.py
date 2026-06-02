@@ -5,8 +5,11 @@ from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import CompanyProfile, Industry, HRTeamMember, CompanyReview
 from .serializers import (
-    CompanyProfileSerializer, CompanyProfileUpdateSerializer,
-    IndustrySerializer, HRTeamMemberSerializer, CompanyReviewSerializer,
+    CompanyProfileSerializer,
+    CompanyProfileUpdateSerializer,
+    IndustrySerializer,
+    HRTeamMemberSerializer,
+    CompanyReviewSerializer,
 )
 from apps.accounts.permissions import IsEmployer
 

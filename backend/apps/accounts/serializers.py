@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import VerificationCode, ActivityLog
+from .models import ActivityLog
 
 User = get_user_model()
 
@@ -18,12 +18,15 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         password = attrs.get("password")
         if username and password:
             from django.contrib.auth import authenticate
+
             user = authenticate(request=self.context.get("request"), username=username, password=password)
             if user is None and "@" in username:
                 # Try looking up by email
                 try:
                     user_obj = User.objects.get(email=username)
-                    user = authenticate(request=self.context.get("request"), username=user_obj.username, password=password)
+                    user = authenticate(
+                        request=self.context.get("request"), username=user_obj.username, password=password
+                    )
                 except User.DoesNotExist:
                     pass
             if user is None:
@@ -43,9 +46,21 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "id", "username", "email", "phone", "user_type", "full_name",
-            "first_name", "last_name", "gender", "date_of_birth", "avatar",
-            "bio", "is_verified", "profile_completion", "date_joined",
+            "id",
+            "username",
+            "email",
+            "phone",
+            "user_type",
+            "full_name",
+            "first_name",
+            "last_name",
+            "gender",
+            "date_of_birth",
+            "avatar",
+            "bio",
+            "is_verified",
+            "profile_completion",
+            "date_joined",
         ]
         read_only_fields = ["id", "is_verified", "profile_completion", "date_joined"]
 
@@ -65,9 +80,17 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "username", "email", "password", "password_confirm",
-            "first_name", "last_name", "phone", "user_type", "gender",
-            "date_of_birth", "accepted_terms",
+            "username",
+            "email",
+            "password",
+            "password_confirm",
+            "first_name",
+            "last_name",
+            "phone",
+            "user_type",
+            "gender",
+            "date_of_birth",
+            "accepted_terms",
         ]
 
     def validate(self, attrs):

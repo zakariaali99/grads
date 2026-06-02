@@ -12,7 +12,10 @@ class UserAdmin(BaseUserAdmin):
     ordering = ["-date_joined"]
     fieldsets = list(BaseUserAdmin.fieldsets) + [
         (_("معلومات إضافية"), {"fields": ("user_type", "phone", "gender", "date_of_birth", "bio", "avatar")}),
-        (_("التوثيق والأمان"), {"fields": ("is_verified", "verified_at", "email_verified", "phone_verified", "two_factor_enabled")}),
+        (
+            _("التوثيق والأمان"),
+            {"fields": ("is_verified", "verified_at", "email_verified", "phone_verified", "two_factor_enabled")},
+        ),
         (_("الحظر"), {"fields": ("is_banned", "ban_reason")}),
         (_("التتبع"), {"fields": ("last_ip", "last_device", "profile_completion")}),
     ]

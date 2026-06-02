@@ -1,7 +1,6 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.utils.translation import gettext_lazy as _
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer, ConversationCreateSerializer
 

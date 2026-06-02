@@ -1,15 +1,20 @@
 from rest_framework import status, generics, views
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from .serializers import (
-    RegisterSerializer, UserSerializer, ChangePasswordSerializer,
-    VerifyCodeSerializer, RequestVerificationSerializer,
-    PasswordResetRequestSerializer, PasswordResetConfirmSerializer,
-    CustomTokenObtainPairSerializer, ActivityLogSerializer,
+    RegisterSerializer,
+    UserSerializer,
+    ChangePasswordSerializer,
+    VerifyCodeSerializer,
+    RequestVerificationSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
+    CustomTokenObtainPairSerializer,
+    ActivityLogSerializer,
 )
 from .utils import generate_verification_code, send_verification_email, calculate_profile_completion
 from .models import VerificationCode, ActivityStreak, ActivityLog
@@ -28,11 +33,14 @@ class RegisterView(generics.CreateAPIView):
         user = serializer.save()
         user.profile_completion = calculate_profile_completion(user)
         user.save(update_fields=["profile_completion"])
-        return Response({
-            "success": True,
-            "message": _("تم إنشاء الحساب بنجاح. يرجى تفعيل البريد الإلكتروني."),
-            "user": UserSerializer(user).data,
-        }, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "success": True,
+                "message": _("تم إنشاء الحساب بنجاح. يرجى تفعيل البريد الإلكتروني."),
+                "user": UserSerializer(user).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class LoginView(TokenObtainPairView):
@@ -92,13 +100,16 @@ class VerifyCodeView(generics.GenericAPIView):
 
         try:
             vcode = VerificationCode.objects.filter(
-                user=request.user, code=code, purpose=purpose,
-                is_used=False, expires_at__gt=timezone.now()
+                user=request.user, code=code, purpose=purpose, is_used=False, expires_at__gt=timezone.now()
             ).latest("created_at")
         except VerificationCode.DoesNotExist:
-            return Response({
-                "success": False, "message": _("رمز التحقق غير صحيح أو منتهي الصلاحية."),
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "success": False,
+                    "message": _("رمز التحقق غير صحيح أو منتهي الصلاحية."),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         vcode.is_used = True
         vcode.save()
@@ -128,10 +139,12 @@ class PasswordResetRequestView(generics.GenericAPIView):
             send_verification_email(user, code)
         except User.DoesNotExist:
             pass
-        return Response({
-            "success": True,
-            "message": _("إذا كان البريد الإلكتروني مسجلاً، ستصلك رسالة التحقق."),
-        })
+        return Response(
+            {
+                "success": True,
+                "message": _("إذا كان البريد الإلكتروني مسجلاً، ستصلك رسالة التحقق."),
+            }
+        )
 
 
 class PasswordResetConfirmView(generics.GenericAPIView):
@@ -144,13 +157,19 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 
         try:
             vcode = VerificationCode.objects.filter(
-                code=serializer.validated_data["code"], purpose="password_reset",
-                is_used=False, expires_at__gt=timezone.now()
+                code=serializer.validated_data["code"],
+                purpose="password_reset",
+                is_used=False,
+                expires_at__gt=timezone.now(),
             ).latest("created_at")
         except VerificationCode.DoesNotExist:
-            return Response({
-                "success": False, "message": _("رمز التحقق غير صحيح أو منتهي الصلاحية."),
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "success": False,
+                    "message": _("رمز التحقق غير صحيح أو منتهي الصلاحية."),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         user = vcode.user
         user.set_password(serializer.validated_data["password"])
@@ -178,14 +197,17 @@ class StreakView(views.APIView):
     def get(self, request):
         streak, created = ActivityStreak.objects.get_or_create(user=request.user)
         from django.utils import timezone
+
         today = timezone.localdate()
-        return Response({
-            "current_streak": streak.current_streak,
-            "longest_streak": streak.longest_streak,
-            "total_activities": streak.total_activities,
-            "last_active": streak.last_active_date.isoformat() if streak.last_active_date else None,
-            "today_active": streak.last_active_date == today,
-        })
+        return Response(
+            {
+                "current_streak": streak.current_streak,
+                "longest_streak": streak.longest_streak,
+                "total_activities": streak.total_activities,
+                "last_active": streak.last_active_date.isoformat() if streak.last_active_date else None,
+                "today_active": streak.last_active_date == today,
+            }
+        )
 
 
 class ActivityLogView(views.APIView):
@@ -193,16 +215,18 @@ class ActivityLogView(views.APIView):
 
     def get(self, request):
         logs = ActivityLog.objects.filter(user=request.user)[:50]
-        return Response([
-            {
-                "id": str(log.id),
-                "activity_type": log.activity_type,
-                "activity_type_display": log.get_activity_type_display(),
-                "description": log.description,
-                "created_at": log.created_at.isoformat(),
-            }
-            for log in logs
-        ])
+        return Response(
+            [
+                {
+                    "id": str(log.id),
+                    "activity_type": log.activity_type,
+                    "activity_type_display": log.get_activity_type_display(),
+                    "description": log.description,
+                    "created_at": log.created_at.isoformat(),
+                }
+                for log in logs
+            ]
+        )
 
     def post(self, request):
         serializer = ActivityLogSerializer(data=request.data)
@@ -213,7 +237,10 @@ class ActivityLogView(views.APIView):
             description=serializer.validated_data.get("description", ""),
             metadata=serializer.validated_data.get("metadata", {}),
         )
-        return Response({
-            "success": True,
-            "activity": ActivityLogSerializer(log).data,
-        }, status=201)
+        return Response(
+            {
+                "success": True,
+                "activity": ActivityLogSerializer(log).data,
+            },
+            status=201,
+        )

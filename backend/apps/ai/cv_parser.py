@@ -1,7 +1,6 @@
 import re
 import pdfplumber
 import PyPDF2
-import io
 from typing import Dict, List, Optional
 
 

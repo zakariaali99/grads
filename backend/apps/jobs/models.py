@@ -47,25 +47,41 @@ class JobPost(models.Model):
         FILLED = "filled", _("تم التوظيف")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    company = models.ForeignKey(CompanyProfile, on_delete=models.CASCADE, related_name="company_jobs", verbose_name=_("الشركة"))
-    posted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("ناشر الوظيفة"))
-    category = models.ForeignKey(JobCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name="jobs", verbose_name=_("التصنيف"))
+    company = models.ForeignKey(
+        CompanyProfile, on_delete=models.CASCADE, related_name="company_jobs", verbose_name=_("الشركة")
+    )
+    posted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("ناشر الوظيفة")
+    )
+    category = models.ForeignKey(
+        JobCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name="jobs", verbose_name=_("التصنيف")
+    )
     title = models.CharField(max_length=255, verbose_name=_("المسمى الوظيفي"))
     description = models.TextField(verbose_name=_("الوصف"))
     requirements = models.TextField(null=True, blank=True, verbose_name=_("المتطلبات"))
     responsibilities = models.TextField(null=True, blank=True, verbose_name=_("المسؤوليات"))
     benefits = models.TextField(null=True, blank=True, verbose_name=_("المزايا"))
     skills = models.ManyToManyField(Skill, related_name="job_posts", verbose_name=_("المهارات المطلوبة"))
-    employment_type = models.CharField(max_length=20, choices=EmploymentType.choices, default=EmploymentType.FULL_TIME, verbose_name=_("نوع التوظيف"))
-    experience_level = models.CharField(max_length=20, choices=ExperienceLevel.choices, default=ExperienceLevel.MID, verbose_name=_("مستوى الخبرة"))
+    employment_type = models.CharField(
+        max_length=20, choices=EmploymentType.choices, default=EmploymentType.FULL_TIME, verbose_name=_("نوع التوظيف")
+    )
+    experience_level = models.CharField(
+        max_length=20, choices=ExperienceLevel.choices, default=ExperienceLevel.MID, verbose_name=_("مستوى الخبرة")
+    )
     years_experience_min = models.IntegerField(default=0, verbose_name=_("الحد الأدنى لسنوات الخبرة"))
     years_experience_max = models.IntegerField(null=True, blank=True, verbose_name=_("الحد الأقصى لسنوات الخبرة"))
-    salary_min = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name=_("الحد الأدنى للراتب"))
-    salary_max = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name=_("الحد الأقصى للراتب"))
+    salary_min = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True, verbose_name=_("الحد الأدنى للراتب")
+    )
+    salary_max = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True, verbose_name=_("الحد الأقصى للراتب")
+    )
     salary_currency = models.CharField(max_length=10, default="LYD", verbose_name=_("عملة الراتب"))
     city = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("المدينة"))
     is_remote = models.BooleanField(default=False, verbose_name=_("عن بعد"))
-    targeted_colleges = models.ManyToManyField(College, blank=True, related_name="targeted_jobs", verbose_name=_("الكليات المستهدفة"))
+    targeted_colleges = models.ManyToManyField(
+        College, blank=True, related_name="targeted_jobs", verbose_name=_("الكليات المستهدفة")
+    )
     vacancies = models.IntegerField(default=1, verbose_name=_("عدد الوظائف الشاغرة"))
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT, verbose_name=_("الحالة"))
     is_featured = models.BooleanField(default=False, verbose_name=_("مميزة"))
@@ -105,8 +121,12 @@ class JobApplication(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     job = models.ForeignKey(JobPost, on_delete=models.CASCADE, related_name="applications", verbose_name=_("الوظيفة"))
-    applicant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="job_applications", verbose_name=_("المتقدم"))
-    cv = models.ForeignKey("graduates.CV", on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("السيرة الذاتية"))
+    applicant = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="job_applications", verbose_name=_("المتقدم")
+    )
+    cv = models.ForeignKey(
+        "graduates.CV", on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("السيرة الذاتية")
+    )
     cover_letter = models.TextField(null=True, blank=True, verbose_name=_("خطاب التقديم"))
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING, verbose_name=_("الحالة"))
     notes = models.TextField(null=True, blank=True, verbose_name=_("ملاحظات"))
@@ -139,9 +159,18 @@ class Interview(models.Model):
         IN_PERSON = "in_person", _("حضوري")
         TECHNICAL = "technical", _("تقني")
 
-    application = models.ForeignKey(JobApplication, on_delete=models.CASCADE, related_name="interviews", verbose_name=_("الطلب"))
-    scheduled_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="scheduled_interviews", verbose_name=_("المجدول بواسطة"))
-    interview_type = models.CharField(max_length=20, choices=Type.choices, default=Type.VIDEO, verbose_name=_("نوع المقابلة"))
+    application = models.ForeignKey(
+        JobApplication, on_delete=models.CASCADE, related_name="interviews", verbose_name=_("الطلب")
+    )
+    scheduled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="scheduled_interviews",
+        verbose_name=_("المجدول بواسطة"),
+    )
+    interview_type = models.CharField(
+        max_length=20, choices=Type.choices, default=Type.VIDEO, verbose_name=_("نوع المقابلة")
+    )
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.SCHEDULED, verbose_name=_("الحالة"))
     scheduled_at = models.DateTimeField(verbose_name=_("موعد المقابلة"))
     duration_minutes = models.IntegerField(default=30, verbose_name=_("المدة (دقيقة)"))

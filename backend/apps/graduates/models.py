@@ -1,4 +1,3 @@
-import uuid
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -8,7 +7,9 @@ from mptt.models import MPTTModel, TreeForeignKey
 class SkillCategory(MPTTModel):
     name_ar = models.CharField(max_length=255, verbose_name=_("الاسم (عربي)"))
     name_en = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("الاسم (إنجليزي)"))
-    parent = TreeForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, related_name="children", verbose_name=_("التصنيف الأب"))
+    parent = TreeForeignKey(
+        "self", on_delete=models.CASCADE, null=True, blank=True, related_name="children", verbose_name=_("التصنيف الأب")
+    )
     icon = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("الأيقونة"))
     sort_order = models.IntegerField(default=0, verbose_name=_("الترتيب"))
 
@@ -26,7 +27,14 @@ class SkillCategory(MPTTModel):
 class Skill(models.Model):
     name_ar = models.CharField(max_length=255, verbose_name=_("الاسم (عربي)"))
     name_en = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("الاسم (إنجليزي)"))
-    category = models.ForeignKey(SkillCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name="skills", verbose_name=_("التصنيف"))
+    category = models.ForeignKey(
+        SkillCategory,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="skills",
+        verbose_name=_("التصنيف"),
+    )
     demand_score = models.FloatField(default=0.0, verbose_name=_("معدل الطلب"))
     is_active = models.BooleanField(default=True, verbose_name=_("نشط"))
     created_at = models.DateTimeField(auto_now_add=True)
@@ -59,7 +67,9 @@ class College(models.Model):
 class GraduateProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="graduate_profile")
     headline = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("العنوان المهني"))
-    college = models.ForeignKey(College, on_delete=models.SET_NULL, null=True, blank=True, related_name="graduates", verbose_name=_("الكلية"))
+    college = models.ForeignKey(
+        College, on_delete=models.SET_NULL, null=True, blank=True, related_name="graduates", verbose_name=_("الكلية")
+    )
     graduation_year = models.IntegerField(null=True, blank=True, verbose_name=_("سنة التخرج"))
     major = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("التخصص"))
     gpa = models.FloatField(null=True, blank=True, verbose_name=_("المعدل"))
@@ -67,9 +77,13 @@ class GraduateProfile(models.Model):
     is_employed = models.BooleanField(default=False, verbose_name=_("موظف حالياً"))
     current_company = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("الشركة الحالية"))
     current_position = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("المنصب الحالي"))
-    skills = models.ManyToManyField(Skill, through="GraduateSkill", related_name="graduates", verbose_name=_("المهارات"))
+    skills = models.ManyToManyField(
+        Skill, through="GraduateSkill", related_name="graduates", verbose_name=_("المهارات")
+    )
     available_for_work = models.BooleanField(default=True, verbose_name=_("متاح للعمل"))
-    expected_salary = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name=_("الراتب المتوقع"))
+    expected_salary = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True, verbose_name=_("الراتب المتوقع")
+    )
     linkedin_url = models.URLField(null=True, blank=True, verbose_name=_("رابط LinkedIn"))
     github_url = models.URLField(null=True, blank=True, verbose_name=_("رابط GitHub"))
     portfolio_url = models.URLField(null=True, blank=True, verbose_name=_("رابط Portfolio"))
@@ -102,7 +116,9 @@ class GraduateSkill(models.Model):
 
     graduate = models.ForeignKey(GraduateProfile, on_delete=models.CASCADE)
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
-    proficiency = models.CharField(max_length=20, choices=Proficiency.choices, default=Proficiency.INTERMEDIATE, verbose_name=_("المستوى"))
+    proficiency = models.CharField(
+        max_length=20, choices=Proficiency.choices, default=Proficiency.INTERMEDIATE, verbose_name=_("المستوى")
+    )
     years_experience = models.IntegerField(default=0, verbose_name=_("سنوات الخبرة"))
     is_top_skill = models.BooleanField(default=False, verbose_name=_("مهارة رئيسية"))
 
@@ -153,13 +169,18 @@ class Experience(models.Model):
     title = models.CharField(max_length=255, verbose_name=_("المسمى الوظيفي"))
     company = models.CharField(max_length=255, verbose_name=_("الشركة"))
     location = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("الموقع"))
-    employment_type = models.CharField(max_length=50, choices=[
-        ("full_time", _("دوام كامل")),
-        ("part_time", _("دوام جزئي")),
-        ("freelance", _("حر")),
-        ("internship", _("تدريب")),
-        ("contract", _("عقد")),
-    ], default="full_time", verbose_name=_("نوع الوظيفة"))
+    employment_type = models.CharField(
+        max_length=50,
+        choices=[
+            ("full_time", _("دوام كامل")),
+            ("part_time", _("دوام جزئي")),
+            ("freelance", _("حر")),
+            ("internship", _("تدريب")),
+            ("contract", _("عقد")),
+        ],
+        default="full_time",
+        verbose_name=_("نوع الوظيفة"),
+    )
     start_date = models.DateField(verbose_name=_("تاريخ البداية"))
     end_date = models.DateField(null=True, blank=True, verbose_name=_("تاريخ النهاية"))
     is_current = models.BooleanField(default=False, verbose_name=_("حالياً"))
@@ -194,7 +215,9 @@ class CV(models.Model):
     graduate = models.ForeignKey(GraduateProfile, on_delete=models.CASCADE, related_name="cvs")
     title = models.CharField(max_length=255, default="السيرة الذاتية", verbose_name=_("العنوان"))
     file = models.FileField(upload_to="cvs/", verbose_name=_("الملف"))
-    language = models.CharField(max_length=10, choices=[("ar", "العربية"), ("en", "English")], default="ar", verbose_name=_("اللغة"))
+    language = models.CharField(
+        max_length=10, choices=[("ar", "العربية"), ("en", "English")], default="ar", verbose_name=_("اللغة")
+    )
     is_default = models.BooleanField(default=False, verbose_name=_("افتراضي"))
     is_parsed = models.BooleanField(default=False, verbose_name=_("تم التحليل"))
     parsed_data = models.JSONField(null=True, blank=True, verbose_name=_("بيانات التحليل"))

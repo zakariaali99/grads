@@ -1,22 +1,37 @@
-from rest_framework import generics, permissions, status, viewsets
+from rest_framework import permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import (
-    GraduateProfile, Education, Certification, Experience,
-    Project, CV, Skill, SkillCategory, College, SavedGraduate,
+    GraduateProfile,
+    Education,
+    Certification,
+    Experience,
+    Project,
+    CV,
+    Skill,
+    SkillCategory,
+    College,
+    SavedGraduate,
     GraduateSkill,
 )
 from .serializers import (
-    GraduateProfileListSerializer, GraduateProfileDetailSerializer,
-    GraduateProfileUpdateSerializer, EducationSerializer,
-    CertificationSerializer, ExperienceSerializer, ProjectSerializer,
-    CVSerializer, SkillSerializer, SkillCategorySerializer,
-    CollegeSerializer, SavedGraduateSerializer,
+    GraduateProfileListSerializer,
+    GraduateProfileDetailSerializer,
+    GraduateProfileUpdateSerializer,
+    EducationSerializer,
+    CertificationSerializer,
+    ExperienceSerializer,
+    ProjectSerializer,
+    CVSerializer,
+    SkillSerializer,
+    SkillCategorySerializer,
+    CollegeSerializer,
+    SavedGraduateSerializer,
     GraduateSkillSerializer,
 )
-from apps.accounts.permissions import IsGraduate, IsOwnerOrAdmin, IsEmployer
+from apps.accounts.permissions import IsGraduate, IsEmployer
 
 
 class GraduateProfileViewSet(viewsets.ModelViewSet):

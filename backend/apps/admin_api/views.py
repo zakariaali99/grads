@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, status, serializers
+from rest_framework import viewsets, permissions, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
@@ -6,8 +6,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from apps.graduates.models import GraduateProfile
 from apps.employers.models import CompanyProfile
-from apps.graduates.serializers import GraduateProfileListSerializer
-from apps.employers.serializers import CompanyProfileSerializer
 from apps.accounts.serializers import UserSerializer
 
 User = get_user_model()
@@ -19,10 +17,22 @@ class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "id", "username", "email", "phone", "user_type", "full_name",
-            "first_name", "last_name", "gender", "date_of_birth",
-            "is_verified", "is_active", "is_banned", "profile_completion",
-            "date_joined", "last_login",
+            "id",
+            "username",
+            "email",
+            "phone",
+            "user_type",
+            "full_name",
+            "first_name",
+            "last_name",
+            "gender",
+            "date_of_birth",
+            "is_verified",
+            "is_active",
+            "is_banned",
+            "profile_completion",
+            "date_joined",
+            "last_login",
         ]
 
     def get_full_name(self, obj):
@@ -79,10 +89,23 @@ class AdminGraduateSerializer(serializers.ModelSerializer):
     class Meta:
         model = GraduateProfile
         fields = [
-            "id", "user", "headline", "college", "college_name", "graduation_year",
-            "major", "gpa", "city", "is_employed", "current_company",
-            "current_position", "skills_count", "is_verified",
-            "profile_completion", "available_for_work", "created_at",
+            "id",
+            "user",
+            "headline",
+            "college",
+            "college_name",
+            "graduation_year",
+            "major",
+            "gpa",
+            "city",
+            "is_employed",
+            "current_company",
+            "current_position",
+            "skills_count",
+            "is_verified",
+            "profile_completion",
+            "available_for_work",
+            "created_at",
         ]
 
     def get_skills_count(self, obj):
@@ -113,10 +136,22 @@ class AdminCompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyProfile
         fields = [
-            "id", "company_name", "industry", "industry_name", "company_size",
-            "city", "website", "description", "is_verified", "is_featured",
-            "total_jobs", "job_count", "total_hires", "profile_views",
-            "created_at", "user",
+            "id",
+            "company_name",
+            "industry",
+            "industry_name",
+            "company_size",
+            "city",
+            "website",
+            "description",
+            "is_verified",
+            "is_featured",
+            "total_jobs",
+            "job_count",
+            "total_hires",
+            "profile_views",
+            "created_at",
+            "user",
         ]
 
     def get_job_count(self, obj):

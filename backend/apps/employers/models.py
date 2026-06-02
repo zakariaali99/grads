@@ -1,4 +1,3 @@
-import uuid
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -31,8 +30,12 @@ class CompanyProfile(models.Model):
     company_name = models.CharField(max_length=255, verbose_name=_("اسم الشركة"))
     company_name_en = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("اسم الشركة (إنجليزي)"))
     commercial_registration = models.CharField(max_length=100, unique=True, verbose_name=_("السجل التجاري"))
-    industry = models.ForeignKey(Industry, on_delete=models.SET_NULL, null=True, blank=True, related_name="companies", verbose_name=_("القطاع"))
-    company_size = models.CharField(max_length=20, choices=CompanySize.choices, default=CompanySize.SMALL, verbose_name=_("حجم الشركة"))
+    industry = models.ForeignKey(
+        Industry, on_delete=models.SET_NULL, null=True, blank=True, related_name="companies", verbose_name=_("القطاع")
+    )
+    company_size = models.CharField(
+        max_length=20, choices=CompanySize.choices, default=CompanySize.SMALL, verbose_name=_("حجم الشركة")
+    )
     website = models.URLField(null=True, blank=True, verbose_name=_("الموقع الإلكتروني"))
     logo = models.ImageField(upload_to="company_logos/", null=True, blank=True, verbose_name=_("الشعار"))
     cover_image = models.ImageField(upload_to="company_covers/", null=True, blank=True, verbose_name=_("صورة الغلاف"))
@@ -66,11 +69,16 @@ class CompanyProfile(models.Model):
 class HRTeamMember(models.Model):
     company = models.ForeignKey(CompanyProfile, on_delete=models.CASCADE, related_name="hr_team")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="hr_memberships")
-    role = models.CharField(max_length=50, choices=[
-        ("admin", _("مدير")),
-        ("recruiter", _("مسؤول توظيف")),
-        ("viewer", _("مشاهد")),
-    ], default="recruiter", verbose_name=_("الدور"))
+    role = models.CharField(
+        max_length=50,
+        choices=[
+            ("admin", _("مدير")),
+            ("recruiter", _("مسؤول توظيف")),
+            ("viewer", _("مشاهد")),
+        ],
+        default="recruiter",
+        verbose_name=_("الدور"),
+    )
     is_active = models.BooleanField(default=True, verbose_name=_("نشط"))
     invited_at = models.DateTimeField(auto_now_add=True)
     joined_at = models.DateTimeField(null=True, blank=True)

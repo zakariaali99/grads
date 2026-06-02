@@ -1,8 +1,6 @@
 import json
-import ipaddress
-from django.utils import timezone
 from django.http.request import RawPostDataException
-from .models import AuditLog, LoginAttempt
+from .models import AuditLog
 
 
 class AuditLogMiddleware:

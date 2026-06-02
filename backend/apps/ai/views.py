@@ -1,11 +1,10 @@
-from rest_framework import views, permissions, status
+from rest_framework import views, permissions
 from rest_framework.response import Response
 from django.utils.translation import gettext_lazy as _
-from .cv_parser import CVParser
 from .recommendations import RecommendationEngine, FraudDetection
 from apps.graduates.models import CV, GraduateProfile, Skill
 from apps.jobs.models import JobPost, JobApplication
-from .tasks import parse_cv_task, calculate_match_scores
+from .tasks import parse_cv_task
 
 
 class ParseCVView(views.APIView):
@@ -22,11 +21,13 @@ class ParseCVView(views.APIView):
             return Response({"error": _("السيرة الذاتية غير موجودة")}, status=404)
 
         task = parse_cv_task.delay(str(cv.id))
-        return Response({
-            "success": True,
-            "message": _("جاري تحليل السيرة الذاتية"),
-            "task_id": task.id,
-        })
+        return Response(
+            {
+                "success": True,
+                "message": _("جاري تحليل السيرة الذاتية"),
+                "task_id": task.id,
+            }
+        )
 
 
 class CandidateRankingView(views.APIView):
@@ -41,9 +42,7 @@ class CandidateRankingView(views.APIView):
         if request.user.user_type == "employer" and job.company.user != request.user:
             return Response({"error": _("غير مصرح")}, status=403)
 
-        applications = JobApplication.objects.filter(job=job).select_related(
-            "applicant__graduate_profile"
-        )
+        applications = JobApplication.objects.filter(job=job).select_related("applicant__graduate_profile")
 
         ranked = []
         for app in applications:
@@ -51,15 +50,17 @@ class CandidateRankingView(views.APIView):
                 profile = app.applicant.graduate_profile
                 score = app.match_score or RecommendationEngine.calculate_match_score(profile, job)
                 gaps = RecommendationEngine.get_skill_gaps(profile, job)
-                ranked.append({
-                    "application_id": str(app.id),
-                    "applicant_id": str(app.applicant.id),
-                    "name": app.applicant.get_full_name() or app.applicant.username,
-                    "match_score": score,
-                    "status": app.status,
-                    "skill_gaps": gaps,
-                    "applied_at": app.applied_at.isoformat(),
-                })
+                ranked.append(
+                    {
+                        "application_id": str(app.id),
+                        "applicant_id": str(app.applicant.id),
+                        "name": app.applicant.get_full_name() or app.applicant.username,
+                        "match_score": score,
+                        "status": app.status,
+                        "skill_gaps": gaps,
+                        "applied_at": app.applied_at.isoformat(),
+                    }
+                )
             except GraduateProfile.DoesNotExist:
                 continue
 
@@ -81,6 +82,7 @@ class JobRecommendationsView(views.APIView):
 
         jobs = RecommendationEngine.recommend_jobs_for_graduate(profile)
         from apps.jobs.serializers import JobPostListSerializer
+
         serializer = JobPostListSerializer(jobs, many=True, context={"request": request})
         return Response(serializer.data)
 
@@ -99,6 +101,7 @@ class GraduateRecommendationsView(views.APIView):
 
         graduates = RecommendationEngine.recommend_graduates_for_job(job)
         from apps.graduates.serializers import GraduateProfileListSerializer
+
         serializer = GraduateProfileListSerializer(graduates, many=True, context={"request": request})
         return Response(serializer.data)
 
@@ -140,9 +143,11 @@ class SkillAnalysisView(views.APIView):
             if s.name_ar not in user_skills:
                 suggested.append({"skill": s.name_ar, "demand_score": s.demand_score})
 
-        return Response({
-            "current_skills": list(user_skills),
-            "market_demand": market_demand,
-            "suggested_skills": suggested[:10],
-            "completion": profile.user.profile_completion,
-        })
+        return Response(
+            {
+                "current_skills": list(user_skills),
+                "market_demand": market_demand,
+                "suggested_skills": suggested[:10],
+                "completion": profile.user.profile_completion,
+            }
+        )

@@ -1,8 +1,8 @@
 from rest_framework import views, permissions
 from rest_framework.response import Response
 from django.utils.translation import gettext_lazy as _
-from elasticsearch_dsl import Q, Search
-from elasticsearch_dsl.query import MultiMatch, Bool, Term, Range
+from elasticsearch_dsl import Search
+from elasticsearch_dsl.query import MultiMatch
 from django.conf import settings
 from elasticsearch import Elasticsearch
 
@@ -32,7 +32,9 @@ class GlobalSearchView(views.APIView):
     def search_graduates(self, client, query, filters, page, page_size):
         s = Search(using=client, index="graduates")
         s = s.query(
-            MultiMatch(query=query, fields=["full_name^3", "headline^2", "skill_names", "major", "college_name", "city"])
+            MultiMatch(
+                query=query, fields=["full_name^3", "headline^2", "skill_names", "major", "college_name", "city"]
+            )
         )
 
         if filters.get("city"):
@@ -79,9 +81,7 @@ class GlobalSearchView(views.APIView):
 
     def search_companies(self, client, query, filters, page, page_size):
         s = Search(using=client, index="companies")
-        s = s.query(
-            MultiMatch(query=query, fields=["company_name^3", "description", "city"])
-        )
+        s = s.query(MultiMatch(query=query, fields=["company_name^3", "description", "city"]))
 
         if filters.get("city"):
             s = s.filter("term", city=filters["city"])

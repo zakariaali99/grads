@@ -7,18 +7,22 @@ from django.db.models import F
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import JobPost, JobApplication, Interview, JobCategory, SavedJob
 from .serializers import (
-    JobPostListSerializer, JobPostDetailSerializer, JobPostCreateSerializer,
-    JobApplicationSerializer, JobApplicationCreateSerializer,
-    InterviewSerializer, JobCategorySerializer, SavedJobSerializer,
+    JobPostListSerializer,
+    JobPostDetailSerializer,
+    JobPostCreateSerializer,
+    JobApplicationSerializer,
+    JobApplicationCreateSerializer,
+    InterviewSerializer,
+    JobCategorySerializer,
+    SavedJobSerializer,
 )
-from apps.accounts.permissions import IsEmployer, IsGraduate, IsOwnerOrAdmin
-from apps.graduates.models import GraduateProfile
+from apps.accounts.permissions import IsEmployer
 
 
 class JobPostViewSet(viewsets.ModelViewSet):
-    queryset = JobPost.objects.select_related(
-        "company", "category", "posted_by"
-    ).prefetch_related("skills", "targeted_colleges")
+    queryset = JobPost.objects.select_related("company", "category", "posted_by").prefetch_related(
+        "skills", "targeted_colleges"
+    )
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = {
         "employment_type": ["exact"],
@@ -110,7 +114,7 @@ class JobPostViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def increment_view(self, request, pk=None):
         job = self.get_object()
-        JobPost.objects.filter(pk=job.pk).update(views_count=models.F("views_count") + 1)
+        JobPost.objects.filter(pk=job.pk).update(views_count=F("views_count") + 1)
         return Response({"success": True})
 
     @action(detail=True, methods=["get"])

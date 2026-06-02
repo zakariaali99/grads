@@ -18,13 +18,15 @@ class User(AbstractUser):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user_type = models.CharField(
-        max_length=20, choices=UserType.choices, default=UserType.GRADUATE,
-        verbose_name=_("نوع المستخدم")
+        max_length=20, choices=UserType.choices, default=UserType.GRADUATE, verbose_name=_("نوع المستخدم")
     )
     phone = models.CharField(
-        max_length=20, unique=True, null=True, blank=True,
+        max_length=20,
+        unique=True,
+        null=True,
+        blank=True,
         validators=[RegexValidator(r"^\+?1?\d{9,15}$")],
-        verbose_name=_("رقم الهاتف")
+        verbose_name=_("رقم الهاتف"),
     )
     gender = models.CharField(max_length=10, choices=Gender.choices, null=True, blank=True, verbose_name=_("الجنس"))
     date_of_birth = models.DateField(null=True, blank=True, verbose_name=_("تاريخ الميلاد"))
@@ -62,12 +64,16 @@ class User(AbstractUser):
 class VerificationCode(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="verification_codes")
     code = models.CharField(max_length=6, verbose_name=_("رمز التحقق"))
-    purpose = models.CharField(max_length=50, verbose_name=_("الغرض"), choices=[
-        ("email", _("البريد الإلكتروني")),
-        ("phone", _("رقم الهاتف")),
-        ("password_reset", _("إعادة تعيين كلمة المرور")),
-        ("two_factor", _("المصادقة الثنائية")),
-    ])
+    purpose = models.CharField(
+        max_length=50,
+        verbose_name=_("الغرض"),
+        choices=[
+            ("email", _("البريد الإلكتروني")),
+            ("phone", _("رقم الهاتف")),
+            ("password_reset", _("إعادة تعيين كلمة المرور")),
+            ("two_factor", _("المصادقة الثنائية")),
+        ],
+    )
     is_used = models.BooleanField(default=False)
     expires_at = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -111,8 +117,7 @@ class LoginAttempt(models.Model):
 class ActivityStreak(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name='activity_streak',
-        verbose_name=_("المستخدم")
+        User, on_delete=models.CASCADE, related_name="activity_streak", verbose_name=_("المستخدم")
     )
     current_streak = models.PositiveIntegerField(default=0, verbose_name=_("المواظبة الحالية"))
     longest_streak = models.PositiveIntegerField(default=0, verbose_name=_("أطول مواظبة"))
@@ -129,6 +134,7 @@ class ActivityStreak(models.Model):
 
     def record_activity(self):
         from django.utils import timezone
+
         today = timezone.localdate()
         self.total_activities += 1
         if self.last_active_date == today:
@@ -146,27 +152,26 @@ class ActivityStreak(models.Model):
             "total": self.total_activities,
         }
         self.streak_history = (self.streak_history or [])[-60:] + [history_entry]
-        self.save(update_fields=["current_streak", "longest_streak", "total_activities", "last_active_date", "streak_history"])
+        self.save(
+            update_fields=["current_streak", "longest_streak", "total_activities", "last_active_date", "streak_history"]
+        )
 
 
 class ActivityLog(models.Model):
     ACTIVITY_TYPES = [
-        ('login', _("تسجيل دخول")),
-        ('apply_job', _("تقديم على وظيفة")),
-        ('update_profile', _("تحديث الملف الشخصي")),
-        ('add_skill', _("إضافة مهارة")),
-        ('view_job', _("عرض وظيفة")),
-        ('send_message', _("إرسال رسالة")),
-        ('create_job', _("إنشاء وظيفة")),
-        ('interview', _("مقابلة")),
-        ('save_job', _("حفظ وظيفة")),
+        ("login", _("تسجيل دخول")),
+        ("apply_job", _("تقديم على وظيفة")),
+        ("update_profile", _("تحديث الملف الشخصي")),
+        ("add_skill", _("إضافة مهارة")),
+        ("view_job", _("عرض وظيفة")),
+        ("send_message", _("إرسال رسالة")),
+        ("create_job", _("إنشاء وظيفة")),
+        ("interview", _("مقابلة")),
+        ("save_job", _("حفظ وظيفة")),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='activity_logs',
-        verbose_name=_("المستخدم")
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="activity_logs", verbose_name=_("المستخدم"))
     activity_type = models.CharField(max_length=30, choices=ACTIVITY_TYPES, verbose_name=_("نوع النشاط"))
     description = models.CharField(max_length=255, blank=True, verbose_name=_("الوصف"))
     metadata = models.JSONField(default=dict, blank=True, verbose_name=_("بيانات إضافية"))

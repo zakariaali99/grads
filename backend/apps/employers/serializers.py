@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.utils.translation import gettext_lazy as _
 from .models import CompanyProfile, Industry, HRTeamMember, CompanyReview
 from apps.accounts.serializers import UserSerializer
 
@@ -28,9 +27,19 @@ class CompanyProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyProfile
         fields = [
-            "company_name", "company_name_en", "industry", "company_size",
-            "website", "logo", "cover_image", "description",
-            "city", "address", "phone", "linkedin_url", "twitter_url",
+            "company_name",
+            "company_name_en",
+            "industry",
+            "company_size",
+            "website",
+            "logo",
+            "cover_image",
+            "description",
+            "city",
+            "address",
+            "phone",
+            "linkedin_url",
+            "twitter_url",
         ]
 
 

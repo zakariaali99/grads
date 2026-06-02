@@ -1,14 +1,14 @@
 from rest_framework import views, permissions
 from rest_framework.response import Response
-from django.db.models import Count, Sum, Q
+from django.db.models import Count
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from datetime import timedelta, datetime
+from datetime import timedelta
 from apps.accounts.models import User
 from apps.graduates.models import GraduateProfile
 from apps.employers.models import CompanyProfile
 from apps.jobs.models import JobPost, JobApplication
-from .models import DailyStat, StatSummary, PlatformEvent
+from .models import StatSummary, PlatformEvent
 
 
 class AdminAnalyticsView(views.APIView):
@@ -40,23 +40,15 @@ class AdminAnalyticsView(views.APIView):
                 "daily_applications": JobApplication.objects.filter(applied_at__date=today).count(),
             },
             "top_cities": list(
-                GraduateProfile.objects.values("city")
-                .annotate(count=Count("id"))
-                .order_by("-count")[:10]
+                GraduateProfile.objects.values("city").annotate(count=Count("id")).order_by("-count")[:10]
             ),
             "top_colleges": list(
-                GraduateProfile.objects.values("college__name_ar")
-                .annotate(count=Count("id"))
-                .order_by("-count")[:10]
+                GraduateProfile.objects.values("college__name_ar").annotate(count=Count("id")).order_by("-count")[:10]
             ),
             "employment_types": list(
-                JobPost.objects.values("employment_type")
-                .annotate(count=Count("id"))
-                .order_by("-count")
+                JobPost.objects.values("employment_type").annotate(count=Count("id")).order_by("-count")
             ),
-            "recent_activity": list(
-                PlatformEvent.objects.values("event_type", "description", "created_at")[:20]
-            ),
+            "recent_activity": list(PlatformEvent.objects.values("event_type", "description", "created_at")[:20]),
         }
         return Response(data)
 
@@ -99,9 +91,7 @@ class EmployerAnalyticsView(views.APIView):
                 "hires": applications.filter(status="accepted").count(),
             },
             "top_skills": list(
-                applications.values("job__skills__name_ar")
-                .annotate(count=Count("id"))
-                .order_by("-count")[:10]
+                applications.values("job__skills__name_ar").annotate(count=Count("id")).order_by("-count")[:10]
             ),
         }
         return Response(data)
@@ -133,10 +123,6 @@ class GraduateAnalyticsView(views.APIView):
                 "accepted": applications.filter(status="accepted").count(),
                 "rejected": applications.filter(status="rejected").count(),
             },
-            "skills": list(
-                profile.graduateskill_set.values(
-                    "skill__name_ar", "proficiency", "is_top_skill"
-                )
-            ),
+            "skills": list(profile.graduateskill_set.values("skill__name_ar", "proficiency", "is_top_skill")),
         }
         return Response(data)

@@ -13,7 +13,9 @@ class Advertisement(models.Model):
     description = models.TextField(blank=True, verbose_name=_("الوصف"))
     image_url = models.URLField(blank=True, verbose_name=_("رابط الصورة"))
     link_url = models.URLField(blank=True, verbose_name=_("رابط الإعلان"))
-    placement = models.CharField(max_length=20, choices=Placement.choices, default=Placement.MEDIUM, verbose_name=_("المكان"))
+    placement = models.CharField(
+        max_length=20, choices=Placement.choices, default=Placement.MEDIUM, verbose_name=_("المكان")
+    )
     is_active = models.BooleanField(default=True, verbose_name=_("نشط"))
     sort_order = models.PositiveIntegerField(default=0, verbose_name=_("الترتيب"))
     click_count = models.PositiveIntegerField(default=0, verbose_name=_("عدد النقرات"))

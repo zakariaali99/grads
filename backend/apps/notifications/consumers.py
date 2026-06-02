@@ -1,8 +1,6 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.tokens import AccessToken
-import json
 
 User = get_user_model()
 
@@ -40,16 +38,19 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def get_unread_count(self):
         from .models import Notification
+
         return Notification.objects.filter(recipient=self.user, is_read=False).count()
 
     @database_sync_to_async
     def mark_notification_read(self, notification_id):
         from .models import Notification
+
         Notification.objects.filter(id=notification_id, recipient=self.user).update(is_read=True)
 
     @database_sync_to_async
     def mark_all_read(self):
         from .models import Notification
+
         Notification.objects.filter(recipient=self.user, is_read=False).update(is_read=True)
 
 

@@ -1,11 +1,11 @@
 from celery import shared_task
 from django.utils import timezone
-from datetime import timedelta
 from apps.graduates.models import CV, GraduateProfile, Skill
 from apps.analytics.models import DailyStat, PlatformEvent
 from apps.ai.cv_parser import CVParser
 from apps.ai.recommendations import RecommendationEngine
 from apps.accounts.models import User
+from apps.jobs.models import JobPost
 
 
 @shared_task
@@ -25,6 +25,7 @@ def parse_cv_task(cv_id):
 @shared_task
 def calculate_match_scores(job_id):
     from apps.jobs.models import JobPost, JobApplication
+
     try:
         job = JobPost.objects.get(id=job_id)
         applications = JobApplication.objects.filter(job=job, match_score__isnull=True)
@@ -47,13 +48,14 @@ def update_daily_stats():
     stat, _ = DailyStat.objects.get_or_create(date=today)
     stat.new_graduates = User.objects.filter(user_type="graduate", date_joined__date=today).count()
     stat.new_employers = User.objects.filter(user_type="employer", date_joined__date=today).count()
-    stat.new_jobs = JobPost.objects.filter(created_at__date=today).count() if "JobPost" in dir() else 0
+    stat.new_jobs = JobPost.objects.filter(created_at__date=today).count()
     stat.save()
 
 
 @shared_task
 def check_fraud_accounts():
     from apps.ai.recommendations import FraudDetection
+
     suspicious = []
     for user in User.objects.filter(is_active=True, is_banned=False):
         result = FraudDetection.check_duplicate_account(user)

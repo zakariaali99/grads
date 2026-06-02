@@ -14,7 +14,9 @@ class Notification(models.Model):
         SYSTEM = "system", _("النظام")
         ANNOUNCEMENT = "announcement", _("إعلان")
 
-    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications", verbose_name=_("المستلم"))
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications", verbose_name=_("المستلم")
+    )
     notification_type = models.CharField(max_length=20, choices=Type.choices, verbose_name=_("النوع"))
     title = models.CharField(max_length=255, verbose_name=_("العنوان"))
     message = models.TextField(verbose_name=_("الرسالة"))
@@ -41,7 +43,9 @@ class Announcement(models.Model):
     content = models.TextField(verbose_name=_("المحتوى"))
     target_roles = models.JSONField(default=list, verbose_name=_("المستهدفون"))
     is_active = models.BooleanField(default=True, verbose_name=_("نشط"))
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, verbose_name=_("المنشئ"))
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, verbose_name=_("المنشئ")
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

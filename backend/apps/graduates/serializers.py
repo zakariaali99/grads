@@ -1,9 +1,16 @@
 from rest_framework import serializers
-from django.utils.translation import gettext_lazy as _
 from .models import (
-    GraduateProfile, GraduateSkill, Skill, SkillCategory,
-    Education, Certification, Experience, Project, CV,
-    College, SavedGraduate,
+    GraduateProfile,
+    GraduateSkill,
+    Skill,
+    SkillCategory,
+    Education,
+    Certification,
+    Experience,
+    Project,
+    CV,
+    College,
+    SavedGraduate,
 )
 from apps.accounts.serializers import UserSerializer
 
@@ -87,9 +94,19 @@ class GraduateProfileListSerializer(serializers.ModelSerializer):
     class Meta:
         model = GraduateProfile
         fields = [
-            "id", "user", "headline", "college", "college_name", "graduation_year",
-            "major", "city", "skills_count", "available_for_work",
-            "profile_views", "is_verified", "created_at",
+            "id",
+            "user",
+            "headline",
+            "college",
+            "college_name",
+            "graduation_year",
+            "major",
+            "city",
+            "skills_count",
+            "available_for_work",
+            "profile_views",
+            "is_verified",
+            "created_at",
         ]
 
     def get_skills_count(self, obj):
@@ -110,17 +127,44 @@ class GraduateProfileDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = GraduateProfile
         fields = [
-            "id", "user", "headline", "college", "college_name", "graduation_year",
-            "major", "gpa", "city", "is_employed", "current_company", "current_position",
-            "skills", "education", "certifications", "experience", "projects", "cvs",
-            "available_for_work", "expected_salary",
-            "linkedin_url", "github_url", "portfolio_url", "behance_url",
-            "profile_views", "search_appearances", "employer_interactions",
-            "is_verified", "created_at", "updated_at",
+            "id",
+            "user",
+            "headline",
+            "college",
+            "college_name",
+            "graduation_year",
+            "major",
+            "gpa",
+            "city",
+            "is_employed",
+            "current_company",
+            "current_position",
+            "skills",
+            "education",
+            "certifications",
+            "experience",
+            "projects",
+            "cvs",
+            "available_for_work",
+            "expected_salary",
+            "linkedin_url",
+            "github_url",
+            "portfolio_url",
+            "behance_url",
+            "profile_views",
+            "search_appearances",
+            "employer_interactions",
+            "is_verified",
+            "created_at",
+            "updated_at",
         ]
         read_only_fields = [
-            "user", "profile_views", "search_appearances", "employer_interactions",
-            "created_at", "updated_at",
+            "user",
+            "profile_views",
+            "search_appearances",
+            "employer_interactions",
+            "created_at",
+            "updated_at",
         ]
 
 
@@ -128,8 +172,19 @@ class GraduateProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = GraduateProfile
         fields = [
-            "headline", "college", "graduation_year", "major", "gpa", "city",
-            "is_employed", "current_company", "current_position",
-            "available_for_work", "expected_salary",
-            "linkedin_url", "github_url", "portfolio_url", "behance_url",
+            "headline",
+            "college",
+            "graduation_year",
+            "major",
+            "gpa",
+            "city",
+            "is_employed",
+            "current_company",
+            "current_position",
+            "available_for_work",
+            "expected_salary",
+            "linkedin_url",
+            "github_url",
+            "portfolio_url",
+            "behance_url",
         ]

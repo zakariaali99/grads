@@ -1,7 +1,6 @@
-from typing import List, Dict, Tuple
-from apps.graduates.models import GraduateProfile, Skill
-from apps.jobs.models import JobPost, JobApplication, JobCategory
-from django.db.models import Q
+from typing import List, Dict
+from apps.graduates.models import GraduateProfile
+from apps.jobs.models import JobPost
 
 
 class RecommendationEngine:
@@ -24,9 +23,10 @@ class RecommendationEngine:
             if city and job.city and city.lower() == job.city.lower():
                 score += 20
 
-            if major and job.category and (
-                major.lower() in job.category.name_ar.lower()
-                or major.lower() in job.category.name_en.lower()
+            if (
+                major
+                and job.category
+                and (major.lower() in job.category.name_ar.lower() or major.lower() in job.category.name_en.lower())
             ):
                 score += 15
 
@@ -84,9 +84,7 @@ class RecommendationEngine:
                     location_score = 15
 
         experience_score = 0
-        total_exp = sum(
-            e.years_experience for e in graduate_profile.graduateskill_set.all()
-        )
+        total_exp = sum(e.years_experience for e in graduate_profile.graduateskill_set.all())
         if total_exp >= job_post.years_experience_min:
             experience_score = 20
         else:
@@ -106,7 +104,6 @@ class FraudDetection:
     @staticmethod
     def check_duplicate_account(user) -> Dict:
         from apps.accounts.models import User
-        from django.conf import settings
 
         suspicious = []
         same_email = User.objects.filter(email=user.email).exclude(pk=user.pk)

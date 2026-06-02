@@ -1,7 +1,6 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
-import json
 
 User = get_user_model()
 
@@ -54,13 +53,15 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                         },
                     )
 
-            await self.send_json({
-                "type": "message_sent",
-                "id": str(message.id),
-                "conversation_id": conversation_id,
-                "content": message_content,
-                "created_at": message.created_at.isoformat(),
-            })
+            await self.send_json(
+                {
+                    "type": "message_sent",
+                    "id": str(message.id),
+                    "conversation_id": conversation_id,
+                    "content": message_content,
+                    "created_at": message.created_at.isoformat(),
+                }
+            )
 
     async def handle_mark_read(self, content):
         conversation_id = content.get("conversation_id")
@@ -92,6 +93,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def create_message(self, conversation_id, content):
         from .models import Conversation, Message
+
         try:
             conversation = Conversation.objects.get(id=conversation_id)
             if self.user not in conversation.participants.all():
@@ -110,6 +112,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def get_conversation(self, conversation_id):
         from .models import Conversation
+
         try:
             return Conversation.objects.get(id=conversation_id)
         except Conversation.DoesNotExist:
@@ -118,7 +121,10 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def mark_messages_read(self, conversation_id):
         from .models import Message
+
         Message.objects.filter(
             conversation_id=conversation_id,
             conversation__participants=self.user,
-        ).exclude(sender=self.user).update(is_read=True)
+        ).exclude(
+            sender=self.user
+        ).update(is_read=True)

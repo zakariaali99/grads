@@ -1,11 +1,18 @@
 from django.contrib import admin
-from django.utils.translation import gettext_lazy as _
 from .models import JobPost, JobApplication, Interview, JobCategory, SavedJob
 
 
 @admin.register(JobPost)
 class JobPostAdmin(admin.ModelAdmin):
-    list_display = ["title", "company", "status", "employment_type", "experience_level", "applications_count", "published_at"]
+    list_display = [
+        "title",
+        "company",
+        "status",
+        "employment_type",
+        "experience_level",
+        "applications_count",
+        "published_at",
+    ]
     list_filter = ["status", "employment_type", "experience_level", "is_featured", "is_urgent"]
     search_fields = ["title", "description", "company__company_name"]
     raw_id_fields = ["company", "posted_by", "category", "skills", "targeted_colleges"]

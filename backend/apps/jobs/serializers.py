@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.utils.translation import gettext_lazy as _
 from .models import JobPost, JobApplication, Interview, JobCategory, SavedJob
 from apps.graduates.serializers import SkillSerializer
 from apps.employers.serializers import CompanyProfileSerializer
@@ -23,17 +22,38 @@ class JobPostListSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobPost
         fields = [
-            "id", "title", "company", "company_name", "company_logo",
-            "company_city", "company_verified", "category", "category_name",
-            "employment_type", "experience_level", "city", "is_remote",
-            "salary_min", "salary_max", "salary_currency",
-            "skills_list", "vacancies", "status", "is_featured", "is_urgent",
-            "views_count", "applications_count", "deadline", "published_at", "time_ago",
+            "id",
+            "title",
+            "company",
+            "company_name",
+            "company_logo",
+            "company_city",
+            "company_verified",
+            "category",
+            "category_name",
+            "employment_type",
+            "experience_level",
+            "city",
+            "is_remote",
+            "salary_min",
+            "salary_max",
+            "salary_currency",
+            "skills_list",
+            "vacancies",
+            "status",
+            "is_featured",
+            "is_urgent",
+            "views_count",
+            "applications_count",
+            "deadline",
+            "published_at",
+            "time_ago",
         ]
         read_only_fields = ["views_count", "applications_count"]
 
     def get_time_ago(self, obj):
         from django.utils.timesince import timesince
+
         if obj.published_at:
             return timesince(obj.published_at)
         return ""
@@ -67,8 +87,15 @@ class JobPostCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobPost
         exclude = [
-            "company", "posted_by", "views_count", "applications_count",
-            "shortlisted_count", "published_at", "closed_at", "created_at", "updated_at",
+            "company",
+            "posted_by",
+            "views_count",
+            "applications_count",
+            "shortlisted_count",
+            "published_at",
+            "closed_at",
+            "created_at",
+            "updated_at",
         ]
 
     def create(self, validated_data):
