@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 255 255 255;
+    --foreground: 15 23 42;
+    --card: 255 255 255;
+    --card-foreground: 15 23 42;
+    --primary: 10 102 194;
+    --primary-foreground: 255 255 255;
+    --secondary: 241 245 249;
+    --secondary-foreground: 15 23 42;
+    --accent: 6 182 212;
+    --accent-foreground: 255 255 255;
+    --border: 226 232 240;
+    --input: 226 232 240;
+    --ring: 10 102 194;
+    --radius: 0.75rem;
+  }
+  .dark {
+    --background: 15 23 42;
+    --foreground: 248 250 252;
+    --card: 30 41 59;
+    --card-foreground: 248 250 252;
+    --primary: 59 130 246;
+    --primary-foreground: 255 255 255;
+    --secondary: 30 41 59;
+    --secondary-foreground: 248 250 252;
+    --accent: 6 182 212;
+    --accent-foreground: 15 23 42;
+    --border: 51 65 85;
+    --input: 51 65 85;
+    --ring: 59 130 246;
+  }
+
+  * { @apply border-gray-200 dark:border-gray-700; }
+
+  html { direction: rtl; }
+
+  body {
+    @apply bg-white dark:bg-navy-900 text-gray-900 dark:text-gray-100 font-sans antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-primary-500 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-primary-500/25 transition-all duration-200 hover:bg-primary-600 hover:shadow-xl hover:shadow-primary-500/30 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-navy-800 px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-navy-700 hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-md active:scale-[0.97];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-navy-800 hover:text-gray-900 dark:hover:text-gray-200 active:scale-[0.97];
+  }
+
+  .btn-primary-lg {
+    @apply btn-primary px-10 py-4 text-base shadow-lg shadow-primary-500/30;
+  }
+
+  .btn-secondary-lg {
+    @apply btn-secondary px-10 py-4 text-base;
+  }
+
+  .input-field {
+    @apply w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-navy-800 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all duration-200;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply badge bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300;
+  }
+
+  .badge-success {
+    @apply badge bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300;
+  }
+
+  .badge-warning {
+    @apply badge bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300;
+  }
+
+  .badge-danger {
+    @apply badge bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300;
+  }
+
+  .glass {
+    @apply bg-white/80 dark:bg-navy-800/80 backdrop-blur-xl;
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl shadow-card border border-gray-200/50 dark:border-gray-700/30;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5;
+  }
+
+  .stat-card {
+    @apply glass-card p-6 card-hover;
+  }
+
+  .stat-value {
+    @apply text-3xl font-bold gradient-text;
+  }
+
+  .stat-label {
+    @apply text-sm text-gray-500 dark:text-gray-400 mt-1;
+  }
+
+  .section-title {
+    @apply text-2xl font-bold text-gray-900 dark:text-white;
+  }
+}
+
+@layer utilities {
+  .gradient-text {
+    @apply bg-gradient-to-l from-primary-500 to-cyan-500 bg-clip-text text-transparent;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.gray.200') transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: theme('colors.gray.200');
+    border-radius: 9999px;
+  }
+
+  .dark .scrollbar-thin {
+    scrollbar-color: theme('colors.gray.700') transparent;
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: theme('colors.gray.700');
+  }
+}
