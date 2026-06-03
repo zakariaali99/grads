@@ -17,6 +17,8 @@ api_patterns = [
     path("admin/", include("apps.admin_api.urls")),
     path("", include("apps.ads.urls")),
     path("social/", include("apps.social.urls")),
+    path("institution/", include("apps.institution.urls")),
+    path("seo/", include("apps.seo.urls")),
 ]
 
 urlpatterns = [

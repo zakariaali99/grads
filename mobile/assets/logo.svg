@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6C63FF"/>
+      <stop offset="100%" stop-color="#8B85FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="80" fill="url(#g)"/>
+  <g transform="translate(256,220)">
+    <path d="M-60,-10 L-60,40 Q-60,60 -40,60 L40,60 Q60,60 60,40 L60,-10 Z" fill="#FFFFFF" opacity="0.95"/>
+    <path d="M0,-70 L-70,-10 L-70,-5 Q-70,5 -50,5 L-50,-10 L50,-10 L50,5 Q70,5 70,-5 L70,-10 Z" fill="#FFFFFF" opacity="0.95"/>
+    <path d="M-20,-10 L-10,-40 L10,-40 L20,-10 Z" fill="#0A0E1A" opacity="0.8"/>
+    <rect x="-25" y="55" width="50" height="8" rx="4" fill="#FFFFFF" opacity="0.6"/>
+  </g>
+  <text x="256" y="370" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">
+    خريجون
+  </text>
+  <text x="256" y="400" font-family="Arial, sans-serif" font-size="16" fill="#FFFFFF" opacity="0.8" text-anchor="middle" letter-spacing="4">
+    GRADUATORS
+  </text>
+</svg>

@@ -2,6 +2,7 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.utils.translation import gettext_lazy as _
+from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import (
     GraduateProfile,
@@ -89,6 +90,20 @@ class GraduateProfileViewSet(viewsets.ModelViewSet):
         GraduateSkill.objects.filter(graduate=profile, skill_id=skill_id).delete()
         return Response({"success": True, "message": _("تم حذف المهارة.")})
 
+    @action(detail=False, methods=["get"])
+    def by_username(self, request):
+        username = request.query_params.get("username")
+        if not username:
+            return Response({"error": _("اسم المستخدم مطلوب.")}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            from django.contrib.auth import get_user_model
+            user = get_user_model().objects.get(username=username, is_active=True, is_banned=False)
+            profile = GraduateProfile.objects.get(user=user)
+            serializer = GraduateProfileDetailSerializer(profile, context={"request": request})
+            return Response(serializer.data)
+        except (get_user_model().DoesNotExist, GraduateProfile.DoesNotExist):
+            return Response({"error": _("لم يتم العثور على الملف الشخصي.")}, status=status.HTTP_404_NOT_FOUND)
+
     @action(detail=True, methods=["get"])
     def saved_status(self, request, pk=None):
         profile = self.get_object()
@@ -96,6 +111,20 @@ class GraduateProfileViewSet(viewsets.ModelViewSet):
             saved = SavedGraduate.objects.filter(employer=request.user, graduate=profile).exists()
             return Response({"saved": saved})
         return Response({"saved": False})
+
+    @action(detail=True, methods=["get"])
+    def download_cv(self, request, pk=None):
+        profile = self.get_object()
+        cv = profile.cvs.filter(is_default=True).first() or profile.cvs.first()
+        if not cv:
+            return Response({"error": _("لم يتم العثور على سيرة ذاتية.")}, status=status.HTTP_404_NOT_FOUND)
+
+        from .pdf_utils import generate_cv_pdf
+        pdf = generate_cv_pdf(profile, profile.user)
+        filename = f"cv_{profile.user.username}.pdf"
+        response = HttpResponse(pdf, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
 
 
 class EducationViewSet(viewsets.ModelViewSet):
@@ -175,6 +204,24 @@ class CVViewSet(viewsets.ModelViewSet):
         cv.is_default = True
         cv.save()
         return Response({"success": True, "message": _("تم تعيين السيرة الافتراضية.")})
+
+    @action(detail=False, methods=["get"])
+    def download_pdf(self, request):
+        profile = GraduateProfile.objects.get(user=request.user)
+        cv_id = request.query_params.get("cv_id")
+        if cv_id:
+            cv = CV.objects.get(id=cv_id, graduate=profile)
+        else:
+            cv = profile.cvs.filter(is_default=True).first() or profile.cvs.first()
+        if not cv:
+            return Response({"error": _("لم يتم العثور على سيرة ذاتية.")}, status=status.HTTP_404_NOT_FOUND)
+
+        from .pdf_utils import generate_cv_pdf
+        pdf = generate_cv_pdf(profile, request.user)
+        filename = f"cv_{request.user.username}.pdf"
+        response = HttpResponse(pdf, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
 
 
 class SkillViewSet(viewsets.ReadOnlyModelViewSet):

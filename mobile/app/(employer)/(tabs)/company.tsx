@@ -1,12 +1,36 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography, borderRadius } from '../../../src/theme';
 import { GlassCard } from '../../../src/components/GlassCard';
 import { Badge } from '../../../src/components/Badge';
 import { useAuth } from '../../../src/hooks/useAuth';
+import { employerService } from '../../../src/services/admin';
 
 export default function EmployerCompanyScreen() {
   const { user } = useAuth();
+  const [company, setCompany] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await employerService.getMyCompany();
+        setCompany(data);
+      } catch {
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
@@ -21,11 +45,17 @@ export default function EmployerCompanyScreen() {
         <View style={styles.companyIcon}>
           <Ionicons name="business-outline" size={40} color={colors.primary} />
         </View>
-        <Text style={[typography.h2, { color: colors.text, marginTop: spacing.md }]}>TechCorp</Text>
-        <Text style={[typography.caption, { color: colors.textSecondary }]}>Technology • Riyadh, KSA</Text>
+        <Text style={[typography.h2, { color: colors.text, marginTop: spacing.md }]}>
+          {company?.company_name || 'Your Company'}
+        </Text>
+        {company?.industry_name || company?.city ? (
+          <Text style={[typography.caption, { color: colors.textSecondary }]}>
+            {[company.industry_name, company.city].filter(Boolean).join(' • ')}
+          </Text>
+        ) : null}
         <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md }}>
-          <Badge label="Verified" variant="success" />
-          <Badge label="50-200 employees" />
+          {company?.is_verified && <Badge label="Verified" variant="success" />}
+          {company?.company_size && <Badge label={company.company_size} />}
         </View>
       </GlassCard>
 
@@ -33,9 +63,9 @@ export default function EmployerCompanyScreen() {
         <Text style={[typography.h3, { color: colors.text, marginBottom: spacing.md }]}>Company Stats</Text>
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>
           {[
-            { label: 'Jobs Posted', value: '45' },
-            { label: 'Hires Made', value: '28' },
-            { label: 'Rating', value: '4.8' },
+            { label: 'Jobs Posted', value: String(company?.total_jobs || 0) },
+            { label: 'Hires Made', value: String(company?.total_hires || 0) },
+            { label: 'Profile Views', value: String(company?.profile_views || 0) },
           ].map((s) => (
             <GlassCard key={s.label} style={{ flex: 1, alignItems: 'center', gap: spacing.xs }}>
               <Text style={[typography.h3, { color: colors.text }]}>{s.value}</Text>
@@ -45,20 +75,23 @@ export default function EmployerCompanyScreen() {
         </View>
       </View>
 
-      <View style={styles.section}>
-        <Text style={[typography.h3, { color: colors.text, marginBottom: spacing.md }]}>About</Text>
-        <GlassCard>
-          <Text style={[typography.caption, { color: colors.textSecondary, lineHeight: 22 }]}>
-            TechCorp is a leading technology company based in Riyadh, specializing in web development,
-            AI solutions, and digital transformation for businesses across the MENA region.
-          </Text>
-        </GlassCard>
-      </View>
+      {company?.description && (
+        <View style={styles.section}>
+          <Text style={[typography.h3, { color: colors.text, marginBottom: spacing.md }]}>About</Text>
+          <GlassCard>
+            <Text style={[typography.caption, { color: colors.textSecondary, lineHeight: 22 }]}>
+              {company.description}
+            </Text>
+          </GlassCard>
+        </View>
+      )}
 
-      <TouchableOpacity style={styles.verifyButton}>
-        <Ionicons name="shield-checkmark-outline" size={20} color={colors.warning} />
-        <Text style={[typography.body, { color: colors.warning }]}>Verify Your Company</Text>
-      </TouchableOpacity>
+      {!company?.is_verified && (
+        <TouchableOpacity style={styles.verifyButton}>
+          <Ionicons name="shield-checkmark-outline" size={20} color={colors.warning} />
+          <Text style={[typography.body, { color: colors.warning }]}>Verify Your Company</Text>
+        </TouchableOpacity>
+      )}
     </ScrollView>
   );
 }

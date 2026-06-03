@@ -1,26 +1,48 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography, borderRadius } from '../../src/theme';
 import { GlassCard } from '../../src/components/GlassCard';
 import { Badge } from '../../src/components/Badge';
 import { useAuth } from '../../src/hooks/useAuth';
 import { FadeInView } from '../../src/animations/components';
-
-const institutionStats = [
-  { label: 'Registered Grads', value: '2,847', change: '+18%', icon: 'people-outline' as const },
-  { label: 'Employed Rate', value: '73%', change: '+5%', icon: 'trending-up-outline' as const },
-  { label: 'Partner Companies', value: '42', change: '+8', icon: 'business-outline' as const },
-  { label: 'Avg Salary', value: '8,200 SAR', change: '+12%', icon: 'cash-outline' as const },
-];
-
-const recentGrads = [
-  { name: 'Nora Al-Ghamdi', major: 'Computer Science', gpa: '4.2', status: 'employed', year: '2024' },
-  { name: 'Ahmed Al-Saud', major: 'Data Science', gpa: '3.8', status: 'seeking', year: '2024' },
-  { name: 'Sara Al-Abdullah', major: 'UI/UX Design', gpa: '4.0', status: 'employed', year: '2023' },
-];
+import { institutionService } from '../../src/services/admin';
 
 export default function InstitutionDashboardScreen() {
   const { user } = useAuth();
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data: dashboardData } = await institutionService.getDashboard();
+        setData(dashboardData);
+      } catch {
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const stats = data
+    ? [
+        { label: 'Registered Grads', value: String(data.total_alumni || 0), change: '', icon: 'people-outline' as const },
+        { label: 'Employed Rate', value: data.employment_rate ? `${Math.round(data.employment_rate * 100)}%` : '-', change: '', icon: 'trending-up-outline' as const },
+        { label: 'Partner Companies', value: String(data.partner_count || 0), change: '', icon: 'business-outline' as const },
+        { label: 'Avg Salary', value: data.avg_salary ? `${Number(data.avg_salary).toLocaleString()} SAR` : '-', change: '', icon: 'cash-outline' as const },
+      ]
+    : [];
+
+  const recentGrads: any[] = data?.recent_graduates || [];
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
@@ -35,11 +57,10 @@ export default function InstitutionDashboardScreen() {
       </FadeInView>
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, paddingHorizontal: spacing.lg, marginBottom: spacing.lg }}>
-        {institutionStats.map((s) => (
+        {stats.map((s) => (
           <GlassCard key={s.label} style={{ width: '48%' as any, gap: spacing.xs }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <Ionicons name={s.icon} size={20} color={colors.primary} />
-              <Text style={[typography.tiny, { color: colors.success }]}>{s.change}</Text>
             </View>
             <Text style={[typography.h3, { color: colors.text }]}>{s.value}</Text>
             <Text style={[typography.tiny, { color: colors.textMuted }]}>{s.label}</Text>
@@ -54,22 +75,29 @@ export default function InstitutionDashboardScreen() {
             <Text style={[typography.small, { color: colors.primaryLight }]}>View All</Text>
           </TouchableOpacity>
         </View>
-        {recentGrads.map((g, i) => (
+        {recentGrads.length > 0 ? recentGrads.map((g, i) => (
           <GlassCard key={i} style={{ marginBottom: spacing.sm }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
               <View style={styles.gradIcon}>
                 <Text style={[typography.bodyBold, { color: colors.primary, fontSize: 16 }]}>
-                  {g.name.split(' ').map(n => n[0]).join('')}
+                  {(g.full_name || g.name || '?').split(' ').map((n: string) => n[0]).join('')}
                 </Text>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[typography.bodyBold, { color: colors.text }]}>{g.name}</Text>
-                <Text style={[typography.tiny, { color: colors.textMuted }]}>{g.major} • GPA: {g.gpa}</Text>
+                <Text style={[typography.bodyBold, { color: colors.text }]}>{g.full_name || g.name}</Text>
+                <Text style={[typography.tiny, { color: colors.textMuted }]}>
+                  {g.major || g.field_of_study || ''}{g.gpa ? ` • GPA: ${g.gpa}` : ''}
+                </Text>
               </View>
-              <Badge label={g.status} variant={g.status === 'employed' ? 'success' : 'warning'} />
+              <Badge label={g.is_employed ? 'employed' : 'seeking'} variant={g.is_employed ? 'success' : 'warning'} />
             </View>
           </GlassCard>
-        ))}
+        )) : (
+          <GlassCard style={{ alignItems: 'center', paddingVertical: spacing.xl }}>
+            <Ionicons name="people-outline" size={32} color={colors.textMuted} />
+            <Text style={[typography.caption, { color: colors.textSecondary, marginTop: spacing.sm }]}>No graduates yet</Text>
+          </GlassCard>
+        )}
       </View>
 
       <View style={styles.section}>

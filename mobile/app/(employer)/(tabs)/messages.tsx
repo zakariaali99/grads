@@ -1,24 +1,57 @@
-import { useState } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography, borderRadius } from '../../../src/theme';
 import { GlassCard } from '../../../src/components/GlassCard';
 import { Avatar } from '../../../src/components/Avatar';
-
-const conversations = [
-  { id: '1', name: 'Ahmed Al-Saud', role: 'Frontend Developer', lastMessage: 'Thank you for the opportunity!', time: '10m', unread: true },
-  { id: '2', name: 'Nora Al-Ghamdi', role: 'UX Designer', lastMessage: 'I confirm my availability for Thursday', time: '2h', unread: true },
-  { id: '3', name: 'Sara Al-Abdullah', role: 'Data Analyst', lastMessage: 'When can I expect to hear back?', time: '1d', unread: false },
-];
+import { chatService, type Conversation } from '../../../src/services/chat';
 
 export default function EmployerMessagesScreen() {
+  const router = useRouter();
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await chatService.getConversations();
+        setConversations(data);
+      } catch {
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const filtered = Array.isArray(conversations)
+    ? conversations.filter((c) =>
+        (c.participant_names || []).some((name) =>
+          name.toLowerCase().includes(search.toLowerCase())
+        )
+      )
+    : [];
+
+  const unreadTotal = Array.isArray(conversations)
+    ? conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0)
+    : 0;
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={styles.header}>
         <Text style={[typography.h2, { color: colors.text }]}>Inbox</Text>
-        <Text style={[typography.caption, { color: colors.primaryLight }]}>3 unread</Text>
+        {unreadTotal > 0 && (
+          <Text style={[typography.caption, { color: colors.primaryLight }]}>{unreadTotal} unread</Text>
+        )}
       </View>
 
       <View style={{ paddingHorizontal: spacing.lg, marginBottom: spacing.md }}>
@@ -35,36 +68,48 @@ export default function EmployerMessagesScreen() {
       </View>
 
       <FlatList
-        data={conversations}
+        data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingHorizontal: spacing.lg, gap: spacing.sm }}
-        renderItem={({ item }) => (
-          <TouchableOpacity>
-            <GlassCard style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-              <Avatar name={item.name} size={48} />
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <View>
-                    <Text style={[typography.bodyBold, { color: colors.text }]}>{item.name}</Text>
-                    <Text style={[typography.tiny, { color: colors.textMuted }]}>{item.role}</Text>
+        renderItem={({ item }) => {
+          const name = item.participant_names?.[0] || 'User';
+          return (
+            <TouchableOpacity onPress={() => router.push(`/(graduate)/messages/${item.id}`)}>
+              <GlassCard style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+                <Avatar name={name} size={48} />
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={[typography.bodyBold, { color: colors.text }]}>{name}</Text>
+                    {item.last_message_at && (
+                      <Text style={[typography.tiny, { color: colors.textMuted }]}>
+                        {new Date(item.last_message_at).toLocaleDateString()}
+                      </Text>
+                    )}
                   </View>
-                  <Text style={[typography.tiny, { color: colors.textMuted }]}>{item.time}</Text>
+                  {item.last_message && (
+                    <Text
+                      style={[
+                        typography.small,
+                        { color: item.unread_count > 0 ? colors.text : colors.textSecondary, marginTop: 2 },
+                        item.unread_count > 0 && { fontWeight: '600' },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {item.last_message}
+                    </Text>
+                  )}
                 </View>
-                <Text
-                  style={[
-                    typography.small,
-                    { color: item.unread ? colors.text : colors.textSecondary, marginTop: 2 },
-                    item.unread && { fontWeight: '600' },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {item.lastMessage}
-                </Text>
-              </View>
-              {item.unread && <View style={styles.unreadDot} />}
-            </GlassCard>
-          </TouchableOpacity>
-        )}
+                {item.unread_count > 0 && <View style={styles.unreadDot} />}
+              </GlassCard>
+            </TouchableOpacity>
+          );
+        }}
+        ListEmptyComponent={
+          <View style={{ alignItems: 'center', paddingVertical: spacing.xxxl }}>
+            <Ionicons name="chatbubbles-outline" size={48} color={colors.textMuted} />
+            <Text style={[typography.body, { color: colors.textSecondary, marginTop: spacing.md }]}>No messages yet</Text>
+          </View>
+        }
       />
     </View>
   );

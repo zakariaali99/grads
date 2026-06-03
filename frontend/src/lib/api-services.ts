@@ -117,7 +117,7 @@ export const interviewService = {
 
 // ─── Notifications ───────────────────────────────────────────────────────────
 export const notificationService = {
-  list: () => api.get<Notification[]>('/notifications/'),
+  list: (params?: any) => api.get<PaginatedResponse<Notification>>('/notifications/', { params }),
   unreadCount: () => api.get<{ count: number }>('/notifications/unread-count/'),
   markRead: (id: string) => api.post(`/notifications/${id}/mark-read/`),
   markAllRead: () => api.post('/notifications/mark-all-read/'),
@@ -229,6 +229,19 @@ export const pipelineService = {
 }
 
 // ─── Search ────────────────────────────────────────────────────────────────────
+export interface SocialProfile {
+  id: string
+  username: string
+  full_name: string
+  avatar: string | null
+  user_type: string
+  followers_count: number
+  following_count: number
+  posts_count: number
+  is_following: boolean
+  is_own_profile: boolean
+}
+
 export const socialService = {
   getFeed: (params?: any) => api.get('/social/feed/', { params }),
   createPost: (data: any) => api.post('/social/posts/', data),
@@ -239,6 +252,7 @@ export const socialService = {
   followUser: (userId: string) => api.post(`/social/follow/${userId}/`),
   unfollowUser: (userId: string) => api.delete(`/social/follow/${userId}/`),
   followStatus: (userId: string) => api.get(`/social/follow/status/${userId}/`),
+  getProfile: (userId: string) => api.get<SocialProfile>(`/social/profile/${userId}/`),
 }
 
 export const searchService = {

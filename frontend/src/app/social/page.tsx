@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import DashboardLayout from '@/components/DashboardLayout'
 import { socialService } from '@/lib/api-services'
+import Link from 'next/link'
 import { Loader2, Heart, MessageCircle, Send, ThumbsUp, Sparkles, Handshake, Lightbulb, HeartHandshake, EyeOff, Trash2 } from 'lucide-react'
 import type { Post, Comment, PaginatedResponse } from '@/lib/types'
 import { useTranslation } from '@/i18n'
@@ -248,14 +249,14 @@ export default function SocialFeedPage() {
             <div key={post.id} className="bg-white dark:bg-navy-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 overflow-hidden">
               {/* Post Header */}
               <div className="flex items-center justify-between p-4 pb-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                    {(post.author.full_name || post.author.username || 'U')[0].toUpperCase()}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">{post.author.full_name || post.author.username}</span>
-                      <span className="text-xs text-gray-400">@{post.author.username}</span>
+                  <div className="flex items-center gap-3">
+                    <Link href={`/social/profile/${post.author.id}`} className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white font-bold text-sm shrink-0 hover:opacity-80 transition-opacity">
+                      {(post.author.full_name || post.author.username || 'U')[0].toUpperCase()}
+                    </Link>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Link href={`/social/profile/${post.author.id}`} className="font-semibold text-sm text-gray-900 dark:text-gray-100 hover:text-primary-500 transition-colors">{post.author.full_name || post.author.username}</Link>
+                        <span className="text-xs text-gray-400">@{post.author.username}</span>
                       {post.author.id !== user?.id && (
                         <button
                           onClick={() => handleToggleFollow(post.author.id)}

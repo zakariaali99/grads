@@ -1,8 +1,10 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 
 from .models import Post, PostReaction, Comment, Follow
 from .serializers import PostSerializer, PostReactionSerializer, CommentSerializer, FollowSerializer
@@ -13,7 +15,11 @@ class PostViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Post.objects.filter(is_active=True).select_related("author")
+        qs = Post.objects.filter(is_active=True).select_related("author")
+        author_id = self.request.query_params.get("author")
+        if author_id:
+            qs = qs.filter(author_id=author_id)
+        return qs
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -43,6 +49,16 @@ class PostViewSet(viewsets.ModelViewSet):
                 reaction.reaction_type = reaction_type
                 reaction.save()
 
+        if post.author != request.user:
+            from apps.notifications.consumers import send_notification
+            send_notification(
+                recipient=post.author,
+                notification_type="system",
+                title=_("تفاعل جديد"),
+                message=f"{request.user.get_full_name() or request.user.username} {_('تفاعل مع منشورك')}",
+                data={"post_id": str(post.id), "reaction_type": reaction_type},
+            )
+
         return Response({"liked": True, "reaction_type": reaction_type})
 
     @action(detail=True, methods=["get"])
@@ -63,7 +79,16 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         post_id = self.request.data.get("post")
         post = get_object_or_404(Post, id=post_id, is_active=True)
-        serializer.save(author=self.request.user, post=post)
+        comment = serializer.save(author=self.request.user, post=post)
+        if post.author != self.request.user:
+            from apps.notifications.consumers import send_notification
+            send_notification(
+                recipient=post.author,
+                notification_type="system",
+                title=_("تعليق جديد"),
+                message=f"{self.request.user.get_full_name() or self.request.user.username} {_('علق على منشورك')}",
+                data={"post_id": str(post.id), "comment_id": str(comment.id)},
+            )
 
     def perform_destroy(self, instance):
         if instance.author != self.request.user:
@@ -92,6 +117,14 @@ class FollowViewSet(viewsets.ViewSet):
         )
 
         if created:
+            from apps.notifications.consumers import send_notification
+            send_notification(
+                recipient=target,
+                notification_type="system",
+                title=_("متابعة جديدة"),
+                message=f"{request.user.get_full_name() or request.user.username} {_('بدأ متابعتك')}",
+                data={"follower_id": str(request.user.id)},
+            )
             return Response({"following": True})
         return Response({"following": True, "detail": "Already following"})
 
@@ -128,6 +161,33 @@ class FollowViewSet(viewsets.ViewSet):
             "is_following": is_following,
             "followers_count": followers_count,
             "following_count": following_count,
+        })
+
+
+class UserProfileView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, user_id):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user = get_object_or_404(User, id=user_id, is_active=True)
+
+        followers_count = Follow.objects.filter(following=user).count()
+        following_count = Follow.objects.filter(follower=user).count()
+        posts_count = Post.objects.filter(author=user, is_active=True).count()
+        is_following = Follow.objects.filter(follower=request.user, following=user).exists() if request.user != user else False
+
+        return Response({
+            "id": str(user.id),
+            "username": user.username,
+            "full_name": user.get_full_name() or user.username,
+            "avatar": user.avatar.url if user.avatar else None,
+            "user_type": user.user_type,
+            "followers_count": followers_count,
+            "following_count": following_count,
+            "posts_count": posts_count,
+            "is_following": is_following,
+            "is_own_profile": request.user == user,
         })
 
 

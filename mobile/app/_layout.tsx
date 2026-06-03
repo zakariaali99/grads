@@ -5,6 +5,7 @@ import { View, ActivityIndicator, StyleSheet, I18nManager } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { colors } from '../src/theme';
 import { useAuthStore } from '../src/store/authStore';
+import { I18nProvider } from '../src/i18n';
 
 export default function RootLayout() {
   const fetchProfile = useAuthStore((s) => s.fetchProfile);
@@ -25,23 +26,25 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.background },
-          animation: 'slide_from_right',
-        }}
-      >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(graduate)" />
-        <Stack.Screen name="(employer)" />
-        <Stack.Screen name="(admin)" />
-        <Stack.Screen name="(institution)" />
-      </Stack>
-    </GestureHandlerRootView>
+    <I18nProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <StatusBar style="light" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.background },
+            animation: 'slide_from_right',
+          }}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(graduate)" />
+          <Stack.Screen name="(employer)" />
+          <Stack.Screen name="(admin)" />
+          <Stack.Screen name="(institution)" />
+        </Stack>
+      </GestureHandlerRootView>
+    </I18nProvider>
   );
 }
 

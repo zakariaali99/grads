@@ -1,8 +1,25 @@
+import { useState, useEffect } from 'react';
+import { View, Text } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../../src/theme';
+import { notificationService } from '../../../src/services/notifications';
 
 export default function GraduateTabsLayout() {
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const { data } = await notificationService.unreadCount();
+        setUnreadCount(data.count);
+      } catch {}
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <Tabs
       screenOptions={{

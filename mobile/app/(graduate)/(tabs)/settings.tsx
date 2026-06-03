@@ -4,35 +4,37 @@ import { router } from 'expo-router';
 import { colors, spacing, typography, borderRadius } from '../../../src/theme';
 import { GlassCard } from '../../../src/components/GlassCard';
 import { useAuth } from '../../../src/hooks/useAuth';
+import { useTranslation } from '../../../src/i18n';
 import { useState } from 'react';
 
 export default function GraduateSettingsScreen() {
   const { logout } = useAuth();
+  const { t, locale, setLocale } = useTranslation();
   const [notifications, setNotifications] = useState(true);
-  const [arabic, setArabic] = useState(true);
+  const isArabic = locale === 'ar';
 
   const settingsSections = [
     {
-      title: 'Account',
+      title: t('nav.settings'),
       items: [
-        { icon: 'person-outline' as const, label: 'Edit Profile', onPress: () => {} },
-        { icon: 'lock-closed-outline' as const, label: 'Change Password', onPress: () => {} },
-        { icon: 'trash-outline' as const, label: 'Delete Account', destructive: true, onPress: () => {} },
+        { icon: 'person-outline' as const, label: t('edit'), onPress: () => {} },
+        { icon: 'lock-closed-outline' as const, label: t('nav.settings'), onPress: () => {} },
+        { icon: 'trash-outline' as const, label: t('delete'), destructive: true, onPress: () => {} },
       ],
     },
     {
       title: 'Preferences',
       items: [
-        { icon: 'notifications-outline' as const, label: 'Notifications', right: 'switch' as const, value: notifications, onToggle: setNotifications },
-        { icon: 'language-outline' as const, label: 'Arabic (RTL)', right: 'switch' as const, value: arabic, onToggle: setArabic },
+        { icon: 'notifications-outline' as const, label: t('notifications'), right: 'switch' as const, value: notifications, onToggle: setNotifications },
+        { icon: 'language-outline' as const, label: t('arabic'), right: 'switch' as const, value: isArabic, onToggle: (v: boolean) => setLocale(v ? 'ar' : 'en') },
       ],
     },
     {
       title: 'Support',
       items: [
         { icon: 'help-circle-outline' as const, label: 'FAQ', onPress: () => {} },
-        { icon: 'mail-outline' as const, label: 'Contact Us', onPress: () => {} },
-        { icon: 'document-text-outline' as const, label: 'Privacy Policy', onPress: () => {} },
+        { icon: 'mail-outline' as const, label: t('notifications'), onPress: () => {} },
+        { icon: 'document-text-outline' as const, label: t('nav.settings'), onPress: () => {} },
         { icon: 'shield-outline' as const, label: 'Terms of Service', onPress: () => {} },
       ],
     },
@@ -44,7 +46,7 @@ export default function GraduateSettingsScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[typography.h2, { color: colors.text }]}>Settings</Text>
+        <Text style={[typography.h2, { color: colors.text }]}>{t('nav.settings')}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -90,7 +92,7 @@ export default function GraduateSettingsScreen() {
 
       <TouchableOpacity onPress={logout} style={[styles.logoutButton]}>
         <Ionicons name="log-out-outline" size={20} color={colors.error} />
-        <Text style={[typography.bodyBold, { color: colors.error }]}>Sign Out</Text>
+        <Text style={[typography.bodyBold, { color: colors.error }]}>{t('logout')}</Text>
       </TouchableOpacity>
     </ScrollView>
   );

@@ -29,7 +29,10 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   register: async (formData) => {
     const { data } = await api.post('/auth/register/', formData);
-    return data;
+    await AsyncStorage.setItem('access_token', data.access);
+    await AsyncStorage.setItem('refresh_token', data.refresh);
+    await AsyncStorage.setItem('user', JSON.stringify(data.user));
+    set({ user: data.user, isAuthenticated: true, isLoading: false });
   },
 
   logout: async () => {

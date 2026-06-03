@@ -33,4 +33,9 @@ urlpatterns = [
         views.FeedViewSet.as_view({"get": "list"}),
         name="social-feed",
     ),
+    path(
+        "profile/<uuid:user_id>/",
+        views.UserProfileView.as_view(),
+        name="social-profile",
+    ),
 ]
