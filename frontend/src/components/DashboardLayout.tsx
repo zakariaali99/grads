@@ -9,7 +9,8 @@ import {
   LayoutDashboard, User, Briefcase, FileText, Calendar,
   MessageSquare, BarChart3, GraduationCap, LogOut,
   ShieldCheck, Building2, Users, Settings,
-  PanelRightClose, PanelRightOpen, PanelLeftClose, PanelLeftOpen, Megaphone,
+  PanelRightClose, PanelRightOpen, PanelLeftClose, PanelLeftOpen,
+  Megaphone, Activity, MessageCircle,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import Topbar from '@/components/Topbar'
@@ -17,6 +18,7 @@ import Topbar from '@/components/Topbar'
 const navItems = {
   graduate: [
     { labelKey: 'nav.dashboard', href: '/graduate', icon: LayoutDashboard },
+    { labelKey: 'nav.feed', href: '/social', icon: MessageCircle },
     { labelKey: 'nav.profile', href: '/graduate/profile', icon: User },
     { labelKey: 'nav.jobs', href: '/graduate/jobs', icon: Briefcase },
     { labelKey: 'nav.applications', href: '/graduate/applications', icon: FileText },
@@ -26,12 +28,19 @@ const navItems = {
   ],
   employer: [
     { labelKey: 'nav.dashboard', href: '/employer', icon: LayoutDashboard },
+    { labelKey: 'nav.feed', href: '/social', icon: MessageCircle },
     { labelKey: 'nav.company', href: '/employer/company', icon: Building2 },
     { labelKey: 'nav.jobs', href: '/employer/jobs', icon: Briefcase },
     { labelKey: 'nav.candidates', href: '/employer/candidates', icon: Users },
     { labelKey: 'nav.interviews', href: '/employer/interviews', icon: Calendar },
     { labelKey: 'nav.messages', href: '/employer/messages', icon: MessageSquare },
     { labelKey: 'nav.reports', href: '/employer/analytics', icon: BarChart3 },
+  ],
+  institution: [
+    { labelKey: 'nav.dashboard', href: '/institution', icon: LayoutDashboard },
+    { labelKey: 'nav.graduates', href: '/institution/graduates', icon: GraduationCap },
+    { labelKey: 'nav.analytics', href: '/institution/analytics', icon: BarChart3 },
+    { labelKey: 'nav.settings', href: '/institution/settings', icon: Settings },
   ],
   admin: [
     { labelKey: 'nav.admin_dashboard', href: '/admin', icon: LayoutDashboard },
@@ -42,6 +51,9 @@ const navItems = {
     { labelKey: 'nav.verifications', href: '/admin/verifications', icon: ShieldCheck },
     { labelKey: 'nav.reports', href: '/admin/reports', icon: BarChart3 },
     { labelKey: 'nav.ads', href: '/admin/ads', icon: Megaphone },
+    { labelKey: 'nav.activity', href: '/admin/activity', icon: FileText },
+    { labelKey: 'nav.events', href: '/admin/events', icon: Calendar },
+    { labelKey: 'nav.stats', href: '/admin/stats', icon: Activity },
     { labelKey: 'nav.settings', href: '/admin/settings', icon: Settings },
   ],
 }
@@ -55,13 +67,17 @@ const roleConfig = {
     labelKey: 'role.employer' as const,
     color: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800',
   },
+  institution: {
+    labelKey: 'role.institution' as const,
+    color: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
+  },
   admin: {
     labelKey: 'role.admin' as const,
     color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800',
   },
 }
 
-export default function DashboardLayout({ children, role }: { children: React.ReactNode; role: 'graduate' | 'employer' | 'admin' }) {
+export default function DashboardLayout({ children, role }: { children: React.ReactNode; role: 'graduate' | 'employer' | 'institution' | 'admin' }) {
   const pathname = usePathname()
   const { user, logout } = useAuthStore()
   const { t, dir } = useTranslation()

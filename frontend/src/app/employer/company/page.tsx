@@ -7,7 +7,7 @@ import DashboardLayout from '@/components/DashboardLayout'
 import {
   Building2, Globe, Phone, MapPin, Briefcase, Users,
   Edit3, ShieldCheck, CheckCircle, Star, AlertCircle,
-  Loader2, Plus, Save, X,
+  Loader2, Plus, Save, X, Clock,
 } from 'lucide-react'
 import { employerService } from '@/lib/api-services'
 import type { CompanyProfile } from '@/lib/types'
@@ -21,9 +21,11 @@ export default function CompanyPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [company, setCompany] = useState<CompanyProfile | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
+  const [verificationRequested, setVerificationRequested] = useState(false)
 
   const [description, setDescription] = useState('')
   const [website, setWebsite] = useState('')
@@ -94,6 +96,16 @@ export default function CompanyPage() {
       setError(t('error'))
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleRequestVerification = async () => {
+    try {
+      await employerService.requestVerification(company!.id)
+      setVerificationRequested(true)
+      setSuccess(t('employer.company.verify_request_sent'))
+    } catch {
+      setError(t('error'))
     }
   }
 
@@ -278,6 +290,12 @@ export default function CompanyPage() {
   return (
     <DashboardLayout role="employer">
       <div className="max-w-5xl mx-auto">
+        {success && (
+          <div className="p-4 mb-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-sm flex items-center gap-2">
+            <CheckCircle className="w-4 h-4" />
+            {success}
+          </div>
+        )}
         {error && (
           <div className="p-4 mb-4 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
@@ -296,10 +314,15 @@ export default function CompanyPage() {
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {company!.company_name}
                   </h1>
-                  {company!.is_verified && (
+                  {company!.is_verified ? (
                     <span className="flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full font-medium">
                       <CheckCircle className="w-3.5 h-3.5" />
                       {t('verified')}
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-full font-medium">
+                      <Clock className="w-3.5 h-3.5" />
+                      {t('employer.company.pending_verification')}
                     </span>
                   )}
                 </div>
@@ -324,10 +347,16 @@ export default function CompanyPage() {
                 <Edit3 className="w-4 h-4" />
                 {t('employer.company.edit_profile')}
               </button>
-              {!company!.is_verified && (
-                <button className="btn-primary">
+              {!company!.is_verified && !verificationRequested && (
+                <button onClick={handleRequestVerification} className="btn-primary">
                   <ShieldCheck className="w-4 h-4" />
-                  {t('employer.company.verify')}
+                  {t('employer.company.verify_request')}
+                </button>
+              )}
+              {!company!.is_verified && verificationRequested && (
+                <button disabled className="btn-primary opacity-60 cursor-not-allowed">
+                  <Clock className="w-4 h-4" />
+                  {t('employer.company.verify_requested')}
                 </button>
               )}
             </div>

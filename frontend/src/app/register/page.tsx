@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { GraduationCap, User, Building2, Loader2, ChevronLeft, Mail, Lock, Phone, UserPlus, Check, AlertCircle } from 'lucide-react'
+import { GraduationCap, User, Building2, Loader2, ChevronLeft, Mail, Lock, Phone, UserPlus, Check, AlertCircle, MapPin, Globe } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useTranslation } from '@/i18n'
 
@@ -24,6 +24,10 @@ export default function RegisterPage() {
     first_name: '',
     last_name: '',
     phone: '',
+    institution_name: '',
+    institution_type: '',
+    city: '',
+    website: '',
     accepted_terms: false,
   })
 
@@ -116,6 +120,21 @@ export default function RegisterPage() {
                   <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-cyan-500 transition-colors" />
                 </div>
               </button>
+              <button
+                onClick={() => { setForm({ ...form, user_type: 'institution' }); setStep(2) }}
+                className="w-full p-6 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-all text-right card-hover group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <GraduationCap className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">{t('register.institution_label')}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('register.institution_desc')}</p>
+                  </div>
+                  <ChevronLeft className="w-5 h-5 text-gray-400 group-hover:text-emerald-500 transition-colors" />
+                </div>
+              </button>
             </div>
           )}
 
@@ -165,6 +184,51 @@ export default function RegisterPage() {
                     onChange={(e) => setForm({ ...form, phone: e.target.value })} />
                 </div>
               </div>
+
+              {form.user_type === 'institution' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('register.institution_name')}</label>
+                    <div className="relative">
+                      <GraduationCap className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input type="text" required className="input-field pr-12" placeholder={t('register.institution_name_placeholder')}
+                        value={form.institution_name}
+                        onChange={(e) => setForm({ ...form, institution_name: e.target.value })} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('register.institution_type')}</label>
+                    <select required className="input-field"
+                      value={form.institution_type}
+                      onChange={(e) => setForm({ ...form, institution_type: e.target.value })}
+                    >
+                      <option value="">{t('register.select_type')}</option>
+                      <option value="university">{t('register.university')}</option>
+                      <option value="college">{t('register.college')}</option>
+                      <option value="institute">{t('register.institute')}</option>
+                      <option value="training_center">{t('register.training_center')}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('city')}</label>
+                    <div className="relative">
+                      <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input type="text" required className="input-field pr-12" placeholder={t('city_example')}
+                        value={form.city}
+                        onChange={(e) => setForm({ ...form, city: e.target.value })} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('website')}</label>
+                    <div className="relative">
+                      <Globe className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input type="url" className="input-field pr-12" placeholder="https://example.edu"
+                        value={form.website}
+                        onChange={(e) => setForm({ ...form, website: e.target.value })} />
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('password')}</label>

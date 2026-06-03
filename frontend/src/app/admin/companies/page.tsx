@@ -8,7 +8,7 @@ import DashboardLayout from '@/components/DashboardLayout'
 import {
   Loader2, Search, Building2, MapPin, Briefcase, BadgeCheck, Shield,
   Eye, AlertTriangle, Star, Users, ChevronLeft, ChevronRight,
-  Globe, Clock, CheckCircle
+  Globe, Clock, CheckCircle, Trash2, X, ToggleLeft, ToggleRight
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTranslation } from '@/i18n'
@@ -55,6 +55,7 @@ export default function AdminCompaniesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [detailCompanyId, setDetailCompanyId] = useState<string | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<AdminCompany | null>(null)
   const pageSize = 9
 
   useEffect(() => { fetchProfile() }, [])
@@ -88,6 +89,31 @@ export default function AdminCompaniesPage() {
     try {
       setActionLoading(id)
       await adminService.verifyCompany(id)
+      await loadCompanies()
+    } catch {
+      setError(t('error'))
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleToggleFeatured = async (id: string) => {
+    try {
+      setActionLoading(id)
+      await adminService.toggleFeaturedCompany(id)
+      await loadCompanies()
+    } catch {
+      setError(t('error'))
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      setActionLoading(id)
+      await adminService.deleteCompany(id)
+      setDeleteConfirm(null)
       await loadCompanies()
     } catch {
       setError(t('error'))
@@ -265,12 +291,18 @@ export default function AdminCompaniesPage() {
                         <Loader2 className="w-5 h-5 animate-spin text-primary-500" />
                       ) : (
                         <>
+                          <button onClick={() => handleToggleFeatured(company.id)} className="btn-ghost p-2" title={company.is_featured ? t('admin.companies.action.unfeature') : t('admin.companies.action.feature')}>
+                            {company.is_featured ? <ToggleRight className="w-4 h-4 text-purple-600" /> : <ToggleLeft className="w-4 h-4" />}
+                          </button>
                           <button onClick={() => setDetailCompanyId(detailCompanyId === company.id ? null : company.id)} className="btn-ghost p-2"><Eye className="w-4 h-4" /></button>
                           {!company.is_verified && (
                             <button onClick={() => handleVerify(company.id)} className="btn-ghost p-2 text-emerald-600">
                               <Shield className="w-4 h-4" />
                             </button>
                           )}
+                          <button onClick={() => setDeleteConfirm(company)} className="btn-ghost p-2 text-red-600">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </>
                       )}
                     </div>
@@ -301,6 +333,26 @@ export default function AdminCompaniesPage() {
             </div>
           )}
         </div>
+
+        {deleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)}>
+            <div className="bg-white dark:bg-navy-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">{t('admin.confirm_delete.title')}</h3>
+                <button onClick={() => setDeleteConfirm(null)} className="btn-ghost p-2"><X className="w-4 h-4" /></button>
+              </div>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+                {t('admin.confirm_delete.message')} <strong>{deleteConfirm.company_name}</strong>
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteConfirm(null)} className="btn-secondary flex-1">{t('admin.confirm_delete.cancel')}</button>
+                <button onClick={() => handleDelete(deleteConfirm.id)} className="btn-primary flex-1 bg-red-600 hover:bg-red-700 border-red-600 text-white">
+                  <Trash2 className="w-4 h-4" /> {t('admin.confirm_delete.confirm')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   )

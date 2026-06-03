@@ -277,6 +277,22 @@ export interface PaginatedResponse<T> {
   results: T[]
 }
 
+export interface TrendDataPoint {
+  date: string
+  users?: number
+  graduates?: number
+  employers?: number
+  companies?: number
+  jobs?: number
+  applications?: number
+}
+
+export interface CityData {
+  city: string
+  graduate_count: number
+  company_count?: number
+}
+
 export interface AnalyticsSummary {
   total_users: number
   total_graduates: number
@@ -287,4 +303,135 @@ export interface AnalyticsSummary {
   total_jobs: number
   active_jobs: number
   total_applications: number
+  trends?: TrendDataPoint[]
+  top_cities?: CityData[]
+}
+
+export interface AuditLog {
+  id: string
+  user: string
+  user_name: string
+  action: string
+  model_name: string
+  object_id: string
+  ip_address: string
+  created_at: string
+}
+
+export interface PlatformEvent {
+  id: string
+  event_type: string
+  description: string
+  created_at: string
+}
+
+export interface Post {
+  id: string
+  author: { id: string; full_name: string; username: string; avatar?: string }
+  content: string
+  image?: string
+  is_pinned: boolean
+  created_at: string
+  reactions_count: number
+  comments_count: number
+  user_reaction?: string
+}
+
+export interface Comment {
+  id: string
+  post: string
+  author: { id: string; full_name: string; username: string; avatar?: string }
+  parent?: string
+  content: string
+  created_at: string
+  replies?: Comment[]
+}
+
+export interface Follow {
+  id: string
+  follower: string
+  following: string
+  created_at: string
+}
+
+export interface CompanyReview {
+  id: string
+  company: string
+  graduate: string
+  graduate_name: string
+  rating: number
+  review: string | null
+  is_approved: boolean
+  created_at: string
+}
+
+export interface DailyStat {
+  date: string
+  new_graduates: number
+  new_employers: number
+  new_jobs: number
+  applications: number
+  interviews: number
+  hirings: number
+}
+
+export interface PipelineStage {
+  id: string
+  name: string
+  name_ar: string
+  order: number
+  color: string
+  is_default: boolean
+}
+
+export interface ApplicationStage {
+  id: string
+  application: string
+  stage: string
+  stage_name: string
+  stage_name_ar: string
+  stage_color: string
+  stage_order: number
+  entered_at: string
+  notes: string
+}
+
+export interface Scorecard {
+  id: string
+  job: string
+  title: string
+  max_score: number
+  is_active: boolean
+  criteria?: ScorecardCriterion[]
+  created_at: string
+}
+
+export interface ScorecardCriterion {
+  id: string
+  scorecard: string
+  name: string
+  name_ar: string
+  max_points: number
+  weight: number
+  order: number
+}
+
+export interface ScorecardResult {
+  id: string
+  application: string
+  scorecard: string
+  scorecard_title: string
+  total_score: number
+  completed_by: string | null
+  completed_at: string
+  notes: string
+  scores: ScorecardCriterionScore[]
+}
+
+export interface ScorecardCriterionScore {
+  id: string
+  result: string
+  criterion: string
+  score: number
+  comment: string
 }

@@ -8,7 +8,7 @@ import DashboardLayout from '@/components/DashboardLayout'
 import {
   Loader2, Search, GraduationCap, MapPin, Building2, Award, BadgeCheck,
   BarChart3, Eye, Shield, AlertTriangle, ChevronLeft, ChevronRight,
-  Star, BookOpen, Users, Verified, XCircle, CheckCircle
+  Star, BookOpen, Users, Verified, XCircle, CheckCircle, Trash2, X
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTranslation } from '@/i18n'
@@ -47,6 +47,7 @@ export default function AdminGraduatesPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [detailGraduateId, setDetailGraduateId] = useState<string | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<AdminGraduate | null>(null)
   const pageSize = 12
 
   useEffect(() => { fetchProfile() }, [])
@@ -271,6 +272,9 @@ export default function AdminGraduatesPage() {
                             <Shield className="w-3.5 h-3.5" /> {t('admin.users.table.verification')}
                           </button>
                         )}
+                        <button onClick={() => setDeleteConfirm(grad)} className="btn-ghost text-xs flex-1 text-red-600">
+                          <Trash2 className="w-3.5 h-3.5" /> {t('delete')}
+                        </button>
                       </>
                     )}
                   </div>
@@ -328,6 +332,9 @@ export default function AdminGraduatesPage() {
                                     <Shield className="w-4 h-4" />
                                   </button>
                                 )}
+                                <button onClick={() => setDeleteConfirm(grad)} className="btn-ghost p-2 text-red-600">
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
                               </>
                             )}
                           </div>
@@ -384,6 +391,30 @@ export default function AdminGraduatesPage() {
             </div>
           )}
         </div>
+
+        {deleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)}>
+            <div className="bg-white dark:bg-navy-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">{t('admin.confirm_delete.title')}</h3>
+                <button onClick={() => setDeleteConfirm(null)} className="btn-ghost p-2"><X className="w-4 h-4" /></button>
+              </div>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+                {t('admin.confirm_delete.message')} <strong>{deleteConfirm.user?.full_name}</strong>
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteConfirm(null)} className="btn-secondary flex-1">{t('admin.confirm_delete.cancel')}</button>
+                <button onClick={async () => {
+                  try { setActionLoading(deleteConfirm.id); await adminService.deleteGraduate(deleteConfirm.id); await loadGraduates() }
+                  catch { setError(t('error')) }
+                  finally { setActionLoading(null); setDeleteConfirm(null) }
+                }} className="btn-primary flex-1 bg-red-600 hover:bg-red-700 border-red-600 text-white">
+                  <Trash2 className="w-4 h-4" /> {t('admin.confirm_delete.confirm')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   )

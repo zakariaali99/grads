@@ -5,14 +5,15 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DashboardLayout from '@/components/DashboardLayout'
 import AdBanner from '@/components/AdBanner'
-import { jobService } from '@/lib/api-services'
+import { jobService, employerService } from '@/lib/api-services'
 import {
   Briefcase, MapPin, Banknote, Clock, BookmarkCheck,
   Star, GraduationCap, ArrowRight, Loader2,
-  CheckCircle, AlertCircle, ExternalLink,
+  CheckCircle, AlertCircle, ExternalLink, MessageSquareText,
+  Send,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { JobPost } from '@/lib/types'
+import type { JobPost, CompanyReview } from '@/lib/types'
 import { useTranslation } from '@/i18n'
 
 const emplTypeLabels: Record<string, string> = {
@@ -45,6 +46,15 @@ export default function JobDetailPage() {
   const [applying, setApplying] = useState(false)
   const [saving, setSaving] = useState(false)
 
+  const [reviews, setReviews] = useState<CompanyReview[]>([])
+  const [loadingReviews, setLoadingReviews] = useState(false)
+  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [reviewRating, setReviewRating] = useState(0)
+  const [reviewText, setReviewText] = useState('')
+  const [submittingReview, setSubmittingReview] = useState(false)
+  const [reviewSubmitted, setReviewSubmitted] = useState(false)
+  const [hoverRating, setHoverRating] = useState(0)
+
   useEffect(() => {
     if (!id) return
     setLoading(true)
@@ -57,6 +67,38 @@ export default function JobDetailPage() {
       .catch(() => setError(t('error')))
       .finally(() => setLoading(false))
   }, [id])
+
+  useEffect(() => {
+    if (job?.company) fetchReviews()
+  }, [job?.company]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchReviews = async () => {
+    setLoadingReviews(true)
+    try {
+      const { data } = await employerService.getReviews(job!.company)
+      const results = Array.isArray(data) ? data : data?.results ?? []
+      setReviews(results)
+    } catch {} finally {
+      setLoadingReviews(false)
+    }
+  }
+
+  const handleSubmitReview = async () => {
+    if (!job || reviewRating === 0) return
+    setSubmittingReview(true)
+    try {
+      await employerService.submitReview({
+        company: job.company,
+        rating: reviewRating,
+        review: reviewText,
+      })
+      setReviewSubmitted(true)
+      setShowReviewForm(false)
+      fetchReviews()
+    } catch {} finally {
+      setSubmittingReview(false)
+    }
+  }
 
   const handleApply = async () => {
     if (!job || job.has_applied) return
@@ -315,6 +357,93 @@ export default function JobDetailPage() {
                     </div>
                   </div>
                 )}
+
+                {/* Company Rating & Reviews */}
+                <div className="glass-card p-5">
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-3">{t('reviews.title')}</h3>
+                  {loadingReviews ? (
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="w-5 h-5 animate-spin text-primary-500" />
+                    </div>
+                  ) : reviews.length > 0 ? (
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => {
+                          const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+                          return (
+                            <Star
+                              key={s}
+                              className={`w-4 h-4 ${s <= Math.round(avg) ? 'text-amber-400 fill-amber-400' : 'text-gray-300 dark:text-gray-600'}`}
+                            />
+                          )
+                        })}
+                      </div>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                        {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">({reviews.length})</span>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{t('reviews.no_reviews')}</p>
+                  )}
+                  <button
+                    onClick={() => setShowReviewForm(!showReviewForm)}
+                    className="btn-secondary text-sm py-2 w-full"
+                  >
+                    <MessageSquareText className="w-4 h-4" />
+                    {t('reviews.write')}
+                  </button>
+
+                  {showReviewForm && (
+                    <div className="mt-4 p-4 bg-gray-50 dark:bg-navy-800 rounded-xl space-y-3">
+                      {reviewSubmitted ? (
+                        <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium text-center">
+                          {t('reviews.thank_you')}
+                        </p>
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-center gap-1">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <button
+                                key={s}
+                                type="button"
+                                onClick={() => setReviewRating(s)}
+                                onMouseEnter={() => setHoverRating(s)}
+                                onMouseLeave={() => setHoverRating(0)}
+                              >
+                                <Star
+                                  className={`w-7 h-7 ${
+                                    s <= (hoverRating || reviewRating)
+                                      ? 'text-amber-400 fill-amber-400'
+                                      : 'text-gray-300 dark:text-gray-600'
+                                  }`}
+                                />
+                              </button>
+                            ))}
+                          </div>
+                          <textarea
+                            value={reviewText}
+                            onChange={(e) => setReviewText(e.target.value)}
+                            className="input-field min-h-[80px] resize-none text-sm"
+                            placeholder={t('reviews.write')}
+                          />
+                          <button
+                            onClick={handleSubmitReview}
+                            disabled={submittingReview || reviewRating === 0}
+                            className="btn-primary text-sm py-2 w-full disabled:opacity-50"
+                          >
+                            {submittingReview ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Send className="w-4 h-4" />
+                            )}
+                            {t('reviews.submit')}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
 
                 {/* Ad */}
                 <AdBanner size="small" />

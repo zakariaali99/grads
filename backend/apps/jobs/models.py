@@ -194,3 +194,95 @@ class SavedJob(models.Model):
         unique_together = ["user", "job"]
         verbose_name = _("وظيفة محفوظة")
         verbose_name_plural = _("الوظائف المحفوظة")
+
+
+class PipelineStage(models.Model):
+    name = models.CharField(max_length=100)
+    name_ar = models.CharField(max_length=100)
+    order = models.IntegerField()
+    color = models.CharField(max_length=7, default="#3b82f6")
+    is_default = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name = _("مرحلة التوظيف")
+        verbose_name_plural = _("مراحل التوظيف")
+
+    def __str__(self):
+        return self.name_ar
+
+
+class ApplicationStage(models.Model):
+    application = models.OneToOneField(JobApplication, on_delete=models.CASCADE, related_name="pipeline_stage")
+    stage = models.ForeignKey(PipelineStage, on_delete=models.PROTECT)
+    entered_at = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = _("مرحلة المتقدم")
+        verbose_name_plural = _("مراحل المتقدمين")
+
+    def __str__(self):
+        return f"{self.application.applicant.username} - {self.stage.name_ar}"
+
+
+class Scorecard(models.Model):
+    job = models.ForeignKey(JobPost, on_delete=models.CASCADE, related_name="scorecards")
+    title = models.CharField(max_length=200)
+    max_score = models.IntegerField(default=100)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("بطاقة تقييم")
+        verbose_name_plural = _("بطاقات التقييم")
+
+    def __str__(self):
+        return f"{self.title} - {self.job.title}"
+
+
+class ScorecardCriterion(models.Model):
+    scorecard = models.ForeignKey(Scorecard, on_delete=models.CASCADE, related_name="criteria")
+    name = models.CharField(max_length=200)
+    name_ar = models.CharField(max_length=200)
+    max_points = models.IntegerField(default=10)
+    weight = models.FloatField(default=1.0)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name = _("معيار تقييم")
+        verbose_name_plural = _("معايير التقييم")
+
+    def __str__(self):
+        return self.name_ar
+
+
+class ScorecardResult(models.Model):
+    application = models.ForeignKey(JobApplication, on_delete=models.CASCADE, related_name="scorecard_results")
+    scorecard = models.ForeignKey(Scorecard, on_delete=models.PROTECT)
+    total_score = models.FloatField(default=0)
+    completed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    completed_at = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = _("نتيجة تقييم")
+        verbose_name_plural = _("نتائج التقييم")
+
+    def __str__(self):
+        return f"{self.application.applicant.username}: {self.total_score}"
+
+
+class ScorecardCriterionScore(models.Model):
+    result = models.ForeignKey(ScorecardResult, on_delete=models.CASCADE, related_name="scores")
+    criterion = models.ForeignKey(ScorecardCriterion, on_delete=models.PROTECT)
+    score = models.FloatField()
+    comment = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = _("درجة معيار")
+        verbose_name_plural = _("درجات المعايير")
+
+    def __str__(self):
+        return f"{self.criterion.name_ar}: {self.score}"

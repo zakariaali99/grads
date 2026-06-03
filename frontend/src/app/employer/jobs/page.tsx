@@ -197,16 +197,6 @@ export default function JobsPage() {
         </button>
       </div>
 
-      {error && (
-        <div className="p-4 mb-4 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
-          <AlertCircle className="w-4 h-4" />
-          {error}
-          <button onClick={() => setError(null)} className="mr-auto text-red-400 hover:text-red-600">
-            <XCircle className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="stat-card flex items-center gap-4">
           <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600">
@@ -270,6 +260,12 @@ export default function JobsPage() {
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+        </div>
+      ) : error ? (
+        <div className="glass-card p-12 text-center">
+          <AlertCircle className="w-12 h-12 text-red-400 mb-4 mx-auto" />
+          <p className="text-gray-500 dark:text-gray-400 mb-4">{error}</p>
+          <button onClick={fetchJobs} className="btn-secondary mt-4">{t('retry')}</button>
         </div>
       ) : (
         <div className="glass-card overflow-hidden">
@@ -383,6 +379,12 @@ export default function JobsPage() {
                 <XCircle className="w-5 h-5" />
               </button>
             </div>
+            {error && (
+              <div className="mx-6 mt-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
             <div className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('employer.jobs.modal.title')}</label>

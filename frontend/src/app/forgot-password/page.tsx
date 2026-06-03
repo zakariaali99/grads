@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { GraduationCap, Mail, ArrowLeft, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useTranslation } from '@/i18n'
+import { authService } from '@/lib/api-services'
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation()
@@ -18,10 +19,10 @@ export default function ForgotPasswordPage() {
     setError('')
     setLoading(true)
     try {
-      await new Promise((r) => setTimeout(r, 1500))
+      await authService.passwordReset({ email })
       setSent(true)
-    } catch {
-      setError(t('forgot_password.error'))
+    } catch (err: any) {
+      setError(err.response?.data?.errors?.[0]?.message || t('forgot_password.error'))
     } finally {
       setLoading(false)
     }

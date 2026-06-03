@@ -66,7 +66,7 @@ export default function EmployerDashboardPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('employer.dashboard.title')}</h1>
-          <p className="text-gray-500 dark:text-gray-400">{t('employer.dashboard.welcome', { name: user?.full_name })}</p>
+          <p className="text-gray-500 dark:text-gray-400">{t('employer.dashboard.welcome', { name: user?.full_name || '' })}</p>
         </div>
       </div>
 

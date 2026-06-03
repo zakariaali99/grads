@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { I18nProvider } from '@/i18n'
+import QueryProvider from '@/components/QueryProvider'
 
 export const metadata: Metadata = {
   title: 'خريجون - منصة توظيف الخريجين',
@@ -20,9 +21,11 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{
           __html: `(function(){var l=localStorage.getItem('locale');if(l==='en'){document.documentElement.lang='en';document.documentElement.dir='ltr'}var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})()`
         }} />
-        <I18nProvider>
-          {children}
-        </I18nProvider>
+        <QueryProvider>
+          <I18nProvider>
+            {children}
+          </I18nProvider>
+        </QueryProvider>
       </body>
     </html>
   )

@@ -35,8 +35,9 @@ export default function AdminReportsPage() {
   const [data, setData] = useState<AnalyticsSummary | null>(null)
   const [fetching, setFetching] = useState(true)
   const [error, setError] = useState('')
-  const [dateFrom] = useState('')
-  const [dateTo] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [period, setPeriod] = useState<'7d' | '30d' | '90d' | 'custom'>('30d')
 
   useEffect(() => { fetchProfile() }, [])
   useEffect(() => {
@@ -113,6 +114,27 @@ export default function AdminReportsPage() {
             <p className="text-slate-500 dark:text-slate-400 mt-1">{t('admin.reports.description')}</p>
           </div>
           <div className="flex items-center gap-3">
+            <div className="flex bg-slate-100 dark:bg-navy-800 rounded-xl p-1">
+              {(['7d', '30d', '90d'] as const).map((p) => (
+                <button key={p} onClick={() => setPeriod(p)}
+                  className={cn('px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                    period === p ? 'bg-white dark:bg-navy-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  )}
+                >{t(`admin.reports.period.${p}`)}</button>
+              ))}
+              <button onClick={() => setPeriod('custom')}
+                className={cn('px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                  period === 'custom' ? 'bg-white dark:bg-navy-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                )}
+              >{t('admin.reports.period.custom')}</button>
+            </div>
+            {period === 'custom' && (
+              <div className="flex items-center gap-2">
+                <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="input-field text-xs w-32" />
+                <span className="text-xs text-slate-400">-</span>
+                <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="input-field text-xs w-32" />
+              </div>
+            )}
             <button className="btn-secondary text-sm"><Download className="w-4 h-4" /> {t('admin.reports.export_pdf')}</button>
             <button className="btn-secondary text-sm"><FileText className="w-4 h-4" /> {t('admin.reports.export_excel')}</button>
           </div>

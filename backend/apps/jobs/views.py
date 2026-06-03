@@ -5,7 +5,11 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.db.models import F
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import JobPost, JobApplication, Interview, JobCategory, SavedJob
+from .models import (
+    JobPost, JobApplication, Interview, JobCategory, SavedJob,
+    PipelineStage, ApplicationStage, Scorecard, ScorecardCriterion,
+    ScorecardResult, ScorecardCriterionScore,
+)
 from .serializers import (
     JobPostListSerializer,
     JobPostDetailSerializer,
@@ -15,6 +19,12 @@ from .serializers import (
     InterviewSerializer,
     JobCategorySerializer,
     SavedJobSerializer,
+    PipelineStageSerializer,
+    ApplicationStageSerializer,
+    ScorecardSerializer,
+    ScorecardCriterionSerializer,
+    ScorecardResultSerializer,
+    ScorecardCriterionScoreSerializer,
 )
 from apps.accounts.permissions import IsEmployer
 
@@ -205,3 +215,86 @@ class SavedJobViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+# ─── Pipeline & Scorecard ─────────────────────────────────────────────────────
+
+
+class PipelineStageViewSet(viewsets.ModelViewSet):
+    queryset = PipelineStage.objects.all()
+    serializer_class = PipelineStageSerializer
+    permission_classes = [permissions.IsAuthenticated, IsEmployer]
+    pagination_class = None
+
+
+class ApplicationStageViewSet(viewsets.GenericViewSet):
+    serializer_class = ApplicationStageSerializer
+    permission_classes = [permissions.IsAuthenticated, IsEmployer]
+    pagination_class = None
+
+    def get_object(self):
+        app_id = self.kwargs.get("application_pk")
+        return ApplicationStage.objects.get_or_create(application_id=app_id)[0]
+
+    def list(self, request, application_pk=None):
+        stage = self.get_object()
+        serializer = self.get_serializer(stage)
+        return Response(serializer.data)
+
+    def create(self, request, application_pk=None):
+        stage = self.get_object()
+        stage_id = request.data.get("stage_id")
+        if not stage_id:
+            return Response({"error": _("stage_id is required")}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            new_stage = PipelineStage.objects.get(pk=stage_id)
+        except PipelineStage.DoesNotExist:
+            return Response({"error": _("Invalid stage")}, status=status.HTTP_400_BAD_REQUEST)
+        stage.stage = new_stage
+        stage.notes = request.data.get("notes", stage.notes)
+        stage.save()
+        return Response(ApplicationStageSerializer(stage).data)
+
+
+class ScorecardViewSet(viewsets.ModelViewSet):
+    queryset = Scorecard.objects.prefetch_related("criteria")
+    serializer_class = ScorecardSerializer
+    permission_classes = [permissions.IsAuthenticated, IsEmployer]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        job_id = self.request.query_params.get("job")
+        if job_id:
+            qs = qs.filter(job_id=job_id)
+        return qs
+
+
+class ScorecardCriterionViewSet(viewsets.ModelViewSet):
+    serializer_class = ScorecardCriterionSerializer
+    permission_classes = [permissions.IsAuthenticated, IsEmployer]
+    pagination_class = None
+
+    def get_queryset(self):
+        return ScorecardCriterion.objects.filter(scorecard_id=self.kwargs.get("scorecard_pk"))
+
+    def perform_create(self, serializer):
+        serializer.save(scorecard_id=self.kwargs.get("scorecard_pk"))
+
+
+class ScorecardResultViewSet(viewsets.ModelViewSet):
+    queryset = ScorecardResult.objects.select_related("scorecard", "application__applicant").prefetch_related("scores__criterion")
+    serializer_class = ScorecardResultSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        if user.user_type == "employer":
+            return qs.filter(application__job__company__user=user)
+        elif user.user_type == "graduate":
+            return qs.filter(application__applicant=user)
+        return qs.none()
+
+    def perform_create(self, serializer):
+        scores_data = self.request.data.pop("scores", [])
+        serializer.save(completed_by=self.request.user, scores=scores_data)

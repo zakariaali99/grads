@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/authStore'
 import { notificationService } from '@/lib/api-services'
 import { useTranslation } from '@/i18n'
 import type { Notification } from '@/lib/types'
+import WebSocketManager from '@/lib/websocket'
 import {
   Bell, CheckCheck, Loader2, X, Briefcase, Calendar,
   MessageSquare, UserCheck, ShieldCheck, AlertCircle, Megaphone,
@@ -41,12 +42,30 @@ export default function NotificationBell() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const wsRef = useRef<WebSocketManager | null>(null)
 
   useEffect(() => {
     if (!user) return
     fetchUnreadCount()
+
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      const ws = new WebSocketManager()
+      ws.onNotification((data) => {
+        setUnreadCount((prev) => prev + 1)
+        if (data.notification) {
+          setNotifications((prev) => [data.notification, ...prev].slice(0, 50))
+        }
+      })
+      ws.connect('/ws/notifications/', token)
+      wsRef.current = ws
+    }
+
     const interval = setInterval(fetchUnreadCount, 30000)
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+      wsRef.current?.disconnect()
+    }
   }, [user])
 
   useEffect(() => {

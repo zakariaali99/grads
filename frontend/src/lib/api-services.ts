@@ -3,7 +3,7 @@ import type {
   User, GraduateProfile, CompanyProfile, JobPost, JobApplication,
   Interview, Notification, Conversation, Message, PaginatedResponse,
   Education, Certification, Experience, Project, Skill, JobCategory,
-  AnalyticsSummary
+  AnalyticsSummary, PipelineStage, Scorecard, ScorecardCriterion, ScorecardResult
 } from './types'
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
@@ -16,6 +16,10 @@ export const authService = {
   updateProfile: (data: Partial<User>) => api.patch('/auth/profile/', data),
   changePassword: (data: { old_password: string; new_password: string; new_password_confirm: string }) =>
     api.put('/auth/change-password/', data),
+  deleteAccount: () => api.delete('/auth/delete-account/'),
+  passwordReset: (data: { email: string }) => api.post('/auth/password-reset/', data),
+  passwordResetConfirm: (data: { code: string; password: string; password_confirm: string }) =>
+    api.post('/auth/password-reset/confirm/', data),
 }
 
 // ─── Graduate Profile ────────────────────────────────────────────────────────
@@ -73,6 +77,10 @@ export const employerService = {
   addHrMember: (companyId: string, data: any) => api.post(`/employers/companies/${companyId}/add_hr_member/`, data),
   getIndustries: () => api.get('/employers/industries/'),
   getReviews: (companyId: string) => api.get(`/employers/reviews/?company=${companyId}`),
+  submitReview: (data: { company: string; rating: number; review: string }) =>
+    api.post('/employers/reviews/', data),
+  approveReview: (id: string) => api.post(`/employers/reviews/${id}/approve/`),
+  requestVerification: (companyId: string) => api.post(`/employers/companies/${companyId}/request-verification/`),
 }
 
 // ─── Jobs ────────────────────────────────────────────────────────────────────
@@ -130,6 +138,19 @@ export const analyticsService = {
   graduate: () => api.get('/analytics/graduate/'),
 }
 
+// ─── CV ───────────────────────────────────────────────────────────────────────
+export const cvService = {
+  list: () => api.get('/graduates/cvs/'),
+  create: (data: FormData) => api.post('/graduates/cvs/', data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  update: (id: string, data: FormData) => api.patch(`/graduates/cvs/${id}/`, data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  delete: (id: string) => api.delete(`/graduates/cvs/${id}/`),
+  setDefault: (id: string) => api.post(`/graduates/cvs/${id}/set_default/`),
+}
+
 // ─── AI ──────────────────────────────────────────────────────────────────────
 export const aiService = {
   parseCv: (cvId: string) => api.post('/ai/parse-cv/', { cv_id: cvId }),
@@ -145,12 +166,22 @@ export const adminService = {
   unbanUser: (id: string) => api.post(`/admin/users/${id}/unban/`),
   verifyUser: (id: string) => api.post(`/admin/users/${id}/verify/`),
   deleteUser: (id: string) => api.delete(`/admin/users/${id}/`),
+  updateUser: (id: string, data: any) => api.patch(`/admin/users/${id}/`, data),
 
   listGraduates: (params?: any) => api.get('/admin/graduates/', { params }),
+  deleteGraduate: (id: string) => api.delete(`/admin/graduates/${id}/`),
+
   listCompanies: (params?: any) => api.get('/admin/companies/', { params }),
+  deleteCompany: (id: string) => api.delete(`/admin/companies/${id}/`),
 
   verifyCompany: (id: string) => api.post(`/admin/companies/${id}/verify/`),
   verifyGraduate: (id: string) => api.post(`/admin/graduates/${id}/verify/`),
+  toggleFeaturedCompany: (id: string) => api.post(`/admin/companies/${id}/toggle-featured/`),
+  toggleFeaturedJob: (id: string) => api.post(`/admin/jobs/${id}/toggle-featured/`),
+
+  getAuditLogs: (params?: any) => api.get('/admin/audit-logs/', { params }),
+  getPlatformEvents: (params?: any) => api.get('/admin/platform-events/', { params }),
+  getDailyStats: (params?: any) => api.get('/admin/daily-stats/', { params }),
 }
 
 // ─── Ads ──────────────────────────────────────────────────────────────────────
@@ -177,4 +208,40 @@ export const adService = {
     update: (id: number, data: any) => api.patch(`/admin/ads/${id}/`, data),
     delete: (id: number) => api.delete(`/admin/ads/${id}/`),
   },
+}
+
+// ─── Pipeline & Scorecard ──────────────────────────────────────────────────────
+export const pipelineService = {
+  getStages: () => api.get<PipelineStage[]>('/jobs/pipeline-stages/'),
+  getApplicationStage: (appId: string) => api.get(`/jobs/applications/${appId}/stage/`),
+  updateApplicationStage: (appId: string, stageId: string, notes?: string) =>
+    api.post(`/jobs/applications/${appId}/stage/`, { stage_id: stageId, notes: notes || '' }),
+  getScorecards: (jobId: string) => api.get<Scorecard[]>(`/jobs/scorecards/?job=${jobId}`),
+  createScorecard: (data: any) => api.post('/jobs/scorecards/', data),
+  updateScorecard: (id: string, data: any) => api.patch(`/jobs/scorecards/${id}/`, data),
+  deleteScorecard: (id: string) => api.delete(`/jobs/scorecards/${id}/`),
+  getCriteria: (scorecardId: string) => api.get<ScorecardCriterion[]>(`/jobs/scorecards/${scorecardId}/criteria/`),
+  createCriterion: (scorecardId: string, data: any) => api.post(`/jobs/scorecards/${scorecardId}/criteria/`, data),
+  deleteCriterion: (scorecardId: string, id: string) => api.delete(`/jobs/scorecards/${scorecardId}/criteria/${id}/`),
+  submitResult: (data: any) => api.post('/jobs/scorecard-results/', data),
+  getResults: (appId?: string) =>
+    api.get<ScorecardResult[]>('/jobs/scorecard-results/', { params: appId ? { application: appId } : {} }),
+}
+
+// ─── Search ────────────────────────────────────────────────────────────────────
+export const socialService = {
+  getFeed: (params?: any) => api.get('/social/feed/', { params }),
+  createPost: (data: any) => api.post('/social/posts/', data),
+  deletePost: (id: string) => api.delete(`/social/posts/${id}/`),
+  toggleLike: (postId: string, reactionType: string) => api.post(`/social/posts/${postId}/like/`, { reaction_type: reactionType }),
+  getComments: (postId: string) => api.get(`/social/posts/${postId}/comments/`),
+  createComment: (postId: string, data: any) => api.post(`/social/posts/${postId}/comments/`, data),
+  followUser: (userId: string) => api.post(`/social/follow/${userId}/`),
+  unfollowUser: (userId: string) => api.delete(`/social/follow/${userId}/`),
+  followStatus: (userId: string) => api.get(`/social/follow/status/${userId}/`),
+}
+
+export const searchService = {
+  globalSearch: (data: { query: string; filters?: any; page?: number; page_size?: number; sort?: string }) =>
+    api.post('/search/global/', data),
 }

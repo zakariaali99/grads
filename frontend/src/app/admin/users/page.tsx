@@ -9,7 +9,7 @@ import DashboardLayout from '@/components/DashboardLayout'
 import {
   Loader2, Search, Users, UserCheck, UserX, Shield, ArrowUpDown,
   Eye, Ban, Trash2, CheckCircle, XCircle, ChevronLeft, ChevronRight,
-  Download, AlertTriangle, Verified
+  Download, AlertTriangle, Verified, X
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTranslation } from '@/i18n'
@@ -49,6 +49,7 @@ export default function AdminUsersPage() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [detailUserId, setDetailUserId] = useState<string | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<AdminUser | null>(null)
   const pageSize = 8
 
   useEffect(() => { fetchProfile() }, [])
@@ -266,7 +267,7 @@ export default function AdminUsersPage() {
                                     <CheckCircle className="w-4 h-4" />
                                   </button>
                                 )}
-                                <button onClick={() => handleAction(() => adminService.deleteUser(u.id), u.id)}
+                                <button onClick={() => setDeleteConfirm(u)}
                                   className="btn-ghost p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" title={t('delete')}>
                                   <Trash2 className="w-4 h-4" />
                                 </button>
@@ -326,6 +327,27 @@ export default function AdminUsersPage() {
             </div>
           )}
         </div>
+
+        {deleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)}>
+            <div className="bg-white dark:bg-navy-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">{t('admin.confirm_delete.title')}</h3>
+                <button onClick={() => setDeleteConfirm(null)} className="btn-ghost p-2"><X className="w-4 h-4" /></button>
+              </div>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+                {t('admin.confirm_delete.message')}
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteConfirm(null)} className="btn-secondary flex-1">{t('admin.confirm_delete.cancel')}</button>
+                <button onClick={() => { handleAction(() => adminService.deleteUser(deleteConfirm.id), deleteConfirm.id); setDeleteConfirm(null) }}
+                  className="btn-primary flex-1 bg-red-600 hover:bg-red-700 border-red-600 text-white">
+                  <Trash2 className="w-4 h-4" /> {t('admin.confirm_delete.confirm')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   )

@@ -2,14 +2,15 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useAuthStore } from '@/store/authStore'
-import { jobService } from '@/lib/api-services'
+import { jobService, adminService } from '@/lib/api-services'
 import type { JobPost, PaginatedResponse } from '@/lib/types'
 import DashboardLayout from '@/components/DashboardLayout'
 import {
   Loader2, Search, Briefcase, Eye, XCircle, Star, Clock,
   TrendingUp, Users, ChevronLeft, ChevronRight, ArrowUpDown,
-  Trash2, ToggleLeft, ToggleRight, AlertTriangle
+  Trash2, ToggleLeft, ToggleRight, AlertTriangle, ExternalLink
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTranslation } from '@/i18n'
@@ -95,8 +96,15 @@ export default function AdminJobsPage() {
   }
 
   const toggleFeatured = async (job: JobPost) => {
-    await jobService.updateJob(job.id, { is_featured: !job.is_featured })
-    await loadJobs()
+    try {
+      setActionLoading(job.id)
+      await adminService.toggleFeaturedJob(job.id)
+      await loadJobs()
+    } catch {
+      setError(t('error'))
+    } finally {
+      setActionLoading(null)
+    }
   }
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
@@ -273,6 +281,9 @@ export default function AdminJobsPage() {
                             <Loader2 className="w-4 h-4 animate-spin text-primary-500" />
                           ) : (
                             <>
+                              <Link href={`/jobs/${job.id}`} target="_blank" className="btn-ghost p-2" title={t('admin.jobs.action.view')}>
+                                <ExternalLink className="w-4 h-4" />
+                              </Link>
                               <button onClick={() => toggleFeatured(job)} className="btn-ghost p-2" title={t('admin.jobs.action.toggle_featured')}>
                                 {job.is_featured ? <ToggleRight className="w-4 h-4 text-amber-600" /> : <ToggleLeft className="w-4 h-4" />}
                               </button>

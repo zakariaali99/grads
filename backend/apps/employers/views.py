@@ -75,7 +75,27 @@ class CompanyReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return CompanyReview.objects.filter(graduate=self.request.user)
+        user = self.request.user
+
+        if user.is_staff:
+            return CompanyReview.objects.all()
+
+        company = CompanyProfile.objects.filter(user=user).first()
+        if company:
+            return CompanyReview.objects.filter(company=company)
+
+        company_id = self.request.query_params.get("company")
+        if company_id:
+            return CompanyReview.objects.filter(company_id=company_id, is_approved=True)
+
+        return CompanyReview.objects.filter(graduate=user)
 
     def perform_create(self, serializer):
         serializer.save(graduate=self.request.user)
+
+    @action(detail=True, methods=["post"])
+    def approve(self, request, pk=None):
+        review = self.get_object()
+        review.is_approved = True
+        review.save()
+        return Response({"status": "approved"})

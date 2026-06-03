@@ -53,7 +53,14 @@ class HRTeamMemberSerializer(serializers.ModelSerializer):
 
 
 class CompanyReviewSerializer(serializers.ModelSerializer):
+    graduate_name = serializers.SerializerMethodField()
+
     class Meta:
         model = CompanyReview
         fields = "__all__"
         read_only_fields = ["graduate", "is_approved", "created_at"]
+
+    def get_graduate_name(self, obj):
+        if obj.graduate:
+            return obj.graduate.get_full_name() or obj.graduate.username
+        return ""
