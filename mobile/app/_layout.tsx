@@ -3,23 +3,31 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet, I18nManager } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { colors } from '../src/theme';
+import { darkColors, lightColors, applyTheme } from '../src/theme';
 import { useAuthStore } from '../src/store/authStore';
+import { useThemeStore } from '../src/store/themeStore';
 import { I18nProvider } from '../src/i18n';
 
 export default function RootLayout() {
   const fetchProfile = useAuthStore((s) => s.fetchProfile);
   const isLoading = useAuthStore((s) => s.isLoading);
+  const isDark = useThemeStore((s) => s.isDark);
+  const initTheme = useThemeStore((s) => s.init);
+  const colors = isDark ? darkColors : lightColors;
+
+  useEffect(() => {
+    applyTheme(isDark);
+  }, [isDark]);
 
   useEffect(() => {
     I18nManager.allowRTL(true);
-    I18nManager.forceRTL(true);
     fetchProfile();
+    initTheme();
   }, []);
 
   if (isLoading) {
     return (
-      <View style={styles.loading}>
+      <View style={[styles.loading, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -28,7 +36,7 @@ export default function RootLayout() {
   return (
     <I18nProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <StatusBar style="light" />
+        <StatusBar style={isDark ? 'light' : 'dark'} />
         <Stack
           screenOptions={{
             headerShown: false,
@@ -51,7 +59,6 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
   },

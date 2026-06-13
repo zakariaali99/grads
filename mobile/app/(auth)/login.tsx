@@ -51,8 +51,11 @@ export default function LoginScreen() {
 
         <View style={{ alignItems: 'center', marginBottom: spacing.xxxl }}>
           <Ionicons name="school-outline" size={64} color={colors.primary} />
-          <Text style={[typography.h1, { color: colors.text, marginTop: spacing.md }]}>Graduators</Text>
-          <Text style={[typography.caption, { color: colors.textSecondary, marginTop: spacing.xs }]}>
+          <Text style={[typography.h1, { color: colors.text, marginTop: spacing.md }]}>خريجون</Text>
+          <Text style={[typography.h2, { color: colors.textSecondary, marginTop: spacing.xs }]}>
+            Graduators
+          </Text>
+          <Text style={[typography.caption, { color: colors.textMuted, marginTop: spacing.sm }]}>
             Sign in to continue
           </Text>
         </View>

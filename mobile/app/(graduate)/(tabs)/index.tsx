@@ -2,24 +2,27 @@ import { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { colors, spacing, typography, borderRadius } from '../../../src/theme';
+import { darkColors, lightColors, spacing, typography, borderRadius } from '../../../src/theme';
 import { GlassCard } from '../../../src/components/GlassCard';
 import { Avatar } from '../../../src/components/Avatar';
 import { useAuth } from '../../../src/hooks/useAuth';
+import { useThemeStore } from '../../../src/store/themeStore';
 import { FadeInView, SlideUpView, StaggerView } from '../../../src/animations/components';
 import { jobService, type JobPost } from '../../../src/services/jobs';
 import { notificationService } from '../../../src/services/notifications';
 
 const quickActions = [
   { icon: 'search-outline' as const, label: 'Find Jobs', color: '#60A5FA', route: '/(graduate)/jobs' },
-  { icon: 'document-text-outline' as const, label: 'My CV', color: '#34D399', route: null },
-  { icon: 'trending-up-outline' as const, label: 'Skill Analysis', color: '#FBBF24', route: null },
-  { icon: 'star-outline' as const, label: 'Recommendations', color: '#8B85FF', route: null },
+  { icon: 'document-text-outline' as const, label: 'My CV', color: '#34D399', route: '/(graduate)/profile' },
+  { icon: 'trending-up-outline' as const, label: 'Analytics', color: '#FBBF24', route: '/(graduate)/(tabs)' },
+  { icon: 'star-outline' as const, label: 'Applications', color: '#8B85FF', route: '/(graduate)/(tabs)' },
 ];
 
 export default function GraduateHomeScreen() {
   const { user } = useAuth();
   const router = useRouter();
+  const isDark = useThemeStore((s) => s.isDark);
+  const colors = isDark ? darkColors : lightColors;
   const [jobs, setJobs] = useState<JobPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -51,7 +54,14 @@ export default function GraduateHomeScreen() {
           <TouchableOpacity onPress={() => router.push('/notifications')} style={{ position: 'relative' }}>
             <Avatar uri={user?.avatar} name={user?.full_name} size={48} />
             {unreadCount > 0 && (
-              <View style={styles.notifBadge}>
+              <View style={{
+                  position: 'absolute', top: -4, right: -4,
+                  backgroundColor: '#EF4444', borderRadius: 10,
+                  minWidth: 20, height: 20,
+                  justifyContent: 'center', alignItems: 'center',
+                  paddingHorizontal: 4, borderWidth: 2,
+                  borderColor: colors.background,
+                }}>
                 <Text style={[typography.tiny, { color: '#fff', fontSize: 10 }]}>
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </Text>
@@ -67,7 +77,16 @@ export default function GraduateHomeScreen() {
           {quickActions.map((action, i) => (
             <StaggerView key={action.label} index={i}>
               <TouchableOpacity
-                style={[styles.actionCard, { borderColor: action.color + '30' }]}
+                style={{
+                  width: '47%',
+                  backgroundColor: colors.surface,
+                  borderRadius: borderRadius.lg,
+                  borderWidth: 1,
+                  borderColor: action.color + '30',
+                  padding: spacing.lg,
+                  alignItems: 'center',
+                  gap: spacing.xs,
+                }}
                 onPress={() => action.route ? router.push(action.route as any) : null}
               >
                 <Ionicons name={action.icon} size={24} color={action.color} />
@@ -79,7 +98,7 @@ export default function GraduateHomeScreen() {
       </View>
 
       <SlideUpView delay={200}>
-        <View style={styles.section}>
+          <View style={styles.section}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md }}>
             <Text style={[typography.h3, { color: colors.text }]}>Recent Jobs</Text>
             <TouchableOpacity onPress={() => router.push('/(graduate)/jobs')}>
@@ -131,28 +150,5 @@ const styles = StyleSheet.create({
   section: {
     padding: spacing.lg,
   },
-  actionCard: {
-    width: '47%',
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.glassBorder,
-    padding: spacing.lg,
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  notifBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: '#EF4444',
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-    borderWidth: 2,
-    borderColor: colors.background,
-  },
+
 });

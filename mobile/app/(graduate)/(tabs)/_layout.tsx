@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../../src/theme';
+import { darkColors, lightColors } from '../../../src/theme';
 import { notificationService } from '../../../src/services/notifications';
+import { useThemeStore } from '../../../src/store/themeStore';
 
 export default function GraduateTabsLayout() {
+  const isDark = useThemeStore((s) => s.isDark);
+  const colors = isDark ? darkColors : lightColors;
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {

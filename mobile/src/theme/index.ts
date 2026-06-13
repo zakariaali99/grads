@@ -1,4 +1,4 @@
-export const colors = {
+export const darkColors = {
   // Brand
   primary: '#6C63FF',
   primaryLight: '#8B85FF',
@@ -39,6 +39,57 @@ export const colors = {
   tabActive: '#6C63FF',
   tabInactive: 'rgba(255, 255, 255, 0.4)',
 } as const;
+
+export const lightColors = {
+  primary: '#6C63FF',
+  primaryLight: '#8B85FF',
+  primaryDark: '#4A42D6',
+
+  background: '#F5F5F7',
+  surface: 'rgba(0, 0, 0, 0.04)',
+  surfaceLight: 'rgba(0, 0, 0, 0.06)',
+  surfaceDark: 'rgba(0, 0, 0, 0.08)',
+
+  text: '#1C1C1E',
+  textSecondary: 'rgba(0, 0, 0, 0.6)',
+  textMuted: 'rgba(0, 0, 0, 0.35)',
+
+  success: '#059669',
+  warning: '#D97706',
+  error: '#DC2626',
+  info: '#2563EB',
+
+  glassBorder: 'rgba(0, 0, 0, 0.08)',
+  glassHighlight: 'rgba(255, 255, 255, 0.6)',
+  glassShadow: 'rgba(0, 0, 0, 0.1)',
+
+  gradientPrimary: ['#6C63FF', '#4A42D6'] as const,
+  gradientSuccess: ['#34D399', '#059669'] as const,
+  gradientWarning: ['#FBBF24', '#D97706'] as const,
+  gradientError: ['#EF4444', '#DC2626'] as const,
+  gradientCard: ['rgba(255,255,255,0.7)', 'rgba(255,255,255,0.3)'] as const,
+
+  tabBar: 'rgba(245, 245, 247, 0.95)',
+  tabBarBorder: 'rgba(0, 0, 0, 0.06)',
+  tabActive: '#6C63FF',
+  tabInactive: 'rgba(0, 0, 0, 0.35)',
+} as const;
+
+export type ColorScheme = typeof darkColors;
+
+export function getColors(isDark: boolean): ColorScheme {
+  return isDark ? darkColors : lightColors;
+}
+
+// Mutable colors object — syncs when theme changes
+export const colors: ColorScheme = { ...darkColors };
+
+export function applyTheme(isDark: boolean) {
+  const source = isDark ? darkColors : lightColors;
+  (Object.keys(source) as (keyof ColorScheme)[]).forEach((key) => {
+    (colors as any)[key] = source[key];
+  });
+}
 
 export const spacing = {
   xs: 4,

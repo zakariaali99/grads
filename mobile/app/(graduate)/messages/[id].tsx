@@ -4,12 +4,14 @@ import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography, borderRadius } from '../../../src/theme';
 import { Avatar } from '../../../src/components/Avatar';
+import { useAuthStore } from '../../../src/store/authStore';
 import { chatService, type Message } from '../../../src/services/chat';
 import { useChatSocket } from '../../../src/hooks/useChatSocket';
 
 export default function ConversationDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const currentUserId = useAuthStore((s) => s.user?.id);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [newMessage, setNewMessage] = useState('');
@@ -96,7 +98,7 @@ export default function ConversationDetailScreen() {
           contentContainerStyle={{ padding: spacing.lg, gap: spacing.sm }}
           onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
           renderItem={({ item }) => {
-            const isOwn = false;
+            const isOwn = item.sender === currentUserId || item.sender_name === 'You';
             return (
               <View style={[styles.messageBubble, isOwn ? styles.ownMessage : styles.otherMessage]}>
                 <Text style={[typography.caption, { color: isOwn ? '#fff' : colors.text }]}>{item.content}</Text>

@@ -1,5 +1,5 @@
+'use client';
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import ar from './ar';
 import en from './en';
 
@@ -23,27 +23,32 @@ const I18nContext = createContext<I18nContextType>({
 
 const STORAGE_KEY = 'locale';
 
+function getStoredLocale(): Locale {
+  if (typeof window === 'undefined') return 'ar';
+  try {
+    const v = localStorage.getItem(STORAGE_KEY);
+    if (v === 'en' || v === 'ar') return v;
+  } catch {}
+  return 'ar';
+}
+
+function saveLocale(v: Locale) {
+  if (typeof window === 'undefined') return;
+  try { localStorage.setItem(STORAGE_KEY, v); } catch {}
+}
+
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('ar');
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const stored = await AsyncStorage.getItem(STORAGE_KEY);
-        if (stored === 'en' || stored === 'ar') {
-          setLocaleState(stored);
-        }
-      } catch {
-      } finally {
-        setReady(true);
-      }
-    })();
+    setLocaleState(getStoredLocale());
+    setReady(true);
   }, []);
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
-    AsyncStorage.setItem(STORAGE_KEY, newLocale).catch(() => {});
+    saveLocale(newLocale);
   }, []);
 
   const t = useCallback((key: string, vars?: Record<string, string | number>): string => {
